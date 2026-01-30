@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Mapa Parque | Telebrasil</title>
+
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <div id="loading" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2 style="color: white; margin-top: 15px;">Carregando Dashboard...</h2>
+      <p style="color: rgba(255,255,255,0.7);">Sincronizando dados da Telebrasil. Por favor, aguarde.</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <header class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="logo-container">
+            <img src="https://i.ibb.co/6R5Q2cbc/images.jpg" alt="Logo Telebrasil" class="logo-telebrasil">
+          </div>
+          <div class="header-text">
+            <h1>Dashboard Telebrasil</h1>
+            <p><i class="fa-solid fa-chart-line"></i> Gestão Estratégica Time Telebrasil</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <div class="user-info">
+            <i class="fa-solid fa-circle-user"></i>
+            <span id="userWelcome">{{ usuario|capitalize }}</span>
+          </div>
+          <button onclick="logout()" class="logout-btn">Sair</button>
+        </div>
+      </div>
+
+      <div class="stats-container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-number" id="total-clientes">0</span>
+            <span class="stat-label">Total Clientes</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="total-oportunidades">0</span>
+            <span class="stat-label">Oportunidades</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="cidades-atendidas">0</span>
+            <span class="stat-label">Cidades</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number" id="consultores">0</span>
+            <span class="stat-label">Consultores</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="controls">
+        <div class="search-section">
+          <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar por Nome, CNPJ ou Cidade..." class="search-input">
+          </div>
+        </div>
+
+        <div class="filter-controls">
+          <div class="filter-group">
+            <label>Consultor Responsável</label>
+            <select id="consultor-filter">
+              <option value="">Todos os Consultores</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button id="export-btn" class="export-btn" title="Exportar para iHelp">
+              <i class="fa-solid fa-file-excel"></i> iHelp
+            </button>
+            <button onclick="window.location.href='/baixar_planilha'" class="export-btn" style="background: #8b5cf6;">
+              <i class="fa-solid fa-download"></i> Master
+            </button>
+          </div>
+        </div>
+
+        <div style="margin-top: 25px; display: flex; justify-content: center;">
+          <form id="uploadForm" class="upload-area" style="width: 100%; max-width: 600px; padding: 30px; border: 2px dashed #660099; border-radius: 15px; text-align: center; background: #fff;">
+            <h4 style="color: #660099; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i> Atualizar Base Master</h4>
+            <input type="file" name="file" id="file-input" hidden required>
+            <label for="file-input" style="cursor: pointer; color: #94a3b8;">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: #660099;"></i>
+              <p style="font-size: 0.9rem; margin-top: 10px;">Selecione o arquivo Excel/CSV da Planilha Master</p>
+            </label>
+            <button type="submit" class="action-btn" style="max-width: 200px; margin: 20px auto 0; font-size: 0.9rem; background: #660099;">Atualizar Dados</button>
+          </form>
+        </div>
+
+        <section class="charts-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin: 30px 0;">
+          <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+            <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-chart-pie"></i> Situação da Base</h4>
+            <canvas id="chartSituacao"></canvas>
+          </div>
+          <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+            <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-map-location-dot"></i> Top 5 Cidades</h4>
+            <canvas id="chartCidades"></canvas>
+          </div>
+        </section>
+
+        <section class="filters-section">
+          <h3><i class="fa-solid fa-bolt"></i> Filtros Inteligentes</h3>
+          <div class="filters-grid" id="filters-container"></div>
+        </section>
+
+        <section class="clients-container" id="clients-container"></section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    sessionStorage.setItem('usuario', "{{ usuario }}");
+
+    function logout() { window.location.href = "{{ url_for('logout') }}"; }
+
+    // Feedback visual do nome do arquivo
+    document.getElementById('file-input')?.addEventListener('change', function (e) {
+      const fileName = e.target.files[0]?.name;
+      if (fileName) {
+        this.nextElementSibling.innerHTML = `<i class="fa-solid fa-file-circle-check" style="font-size: 2.5rem; color: #10b981;"></i><p style="color: #10b981; font-weight: bold;">${fileName}</p>`;
+      }
+    });
+
+    // Envio do formulário de Upload
+    document.getElementById('uploadForm')?.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const loading = document.getElementById('loading');
+      if (loading) loading.style.display = 'flex';
+
+      try {
+        const response = await fetch('/upload', { method: 'POST', body: formData });
+        const resultado = await response.json();
+        if (response.ok) {
+          location.reload();
+        } else {
+          alert("Erro no Upload: " + resultado.erro);
+        }
+      } catch (err) {
+        alert("Erro de conexão com o servidor.");
+      } finally {
+        if (loading) loading.style.display = 'none';
+      }
+    });
+  </script>
+
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</body>
+
+</html>

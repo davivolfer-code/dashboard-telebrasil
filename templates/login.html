@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso - Time Telebrasil</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            --vivo-purple: #660099;
+            --vivo-gradient: linear-gradient(135deg, #660099 0%, #8b5cf6 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #660099 0%, #8b5cf6 50%, #a855f7 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+        }
+
+
+        /* Efeito de Vidro no Container */
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 50px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(102, 0, 153, 0.3);
+            text-align: center;
+
+        }
+
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            background: var(--vivo-gradient);
+            border-radius: 24px;
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: 800;
+            box-shadow: 0 10px 20px rgba(102, 0, 153, 0.3);
+            transform: rotate(-5deg);
+        }
+
+        h1 {
+            color: #660099;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 500;
+            margin-left: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: #f8fafc;
+            border: 2px solid #f1f5f9;
+            border-radius: 14px;
+            color: #1e293b;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+
+        input::placeholder {
+            color: #64748b;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--vivo-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .login-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+
+        .erro-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .authorized-section {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .authorized-section h3 {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .user-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        .user-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+
+        <h1>Mapa Parque</h1>
+        <p class="subtitle">Gestão Estratégica Telebrasil</p>
+
+        {% if erro %}
+        <div class="erro-box">⚠️ {{ erro }}</div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <div class="form-group">
+                <label>Usuário</label>
+                <input type="text" name="username" placeholder="Seu usuário" required>
+            </div>
+
+            <div class="form-group">
+                <label>Senha</label>
+                <input type="password" name="password" placeholder="••••••" required>
+            </div>
+
+            <button type="submit" class="login-btn">Entrar no Sistema</button>
+        </form>
+
+</body>
+
+</html>

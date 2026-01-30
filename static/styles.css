@@ -1,0 +1,385 @@
+/* DASHBOARD TELEBRASIL - VERSÃO FINAL CORRIGIDA
+   Branding: Vivo/Telebrasil (Purple & White)
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+/* Container que agrupa os filtros */
+.filter-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    align-items: flex-end;
+    margin-top: 20px;
+}
+
+/* Estilização dos Grupos (Label + Select) */
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--vivo-purple);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 5px;
+}
+
+/* Customização dos Selects */
+#consultor-filter, 
+#tipo-informacao {
+    appearance: none; /* Remove a seta padrão do navegador */
+    background-color: #f8fafc;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23660099'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+    border: 2px solid #f1f5f9;
+    border-radius: 12px;
+    padding: 12px 40px 12px 15px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+/* Efeito ao passar o mouse */
+#consultor-filter:hover, 
+#tipo-informacao:hover {
+    border-color: var(--vivo-purple-light);
+    background-color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 0, 153, 0.05);
+}
+
+/* Efeito ao clicar/focar */
+#consultor-filter:focus, 
+#tipo-informacao:focus {
+    outline: none;
+    border-color: var(--vivo-purple);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(102, 0, 153, 0.1);
+}
+
+/* Ajuste nos botões de exportação para alinharem com os selects */
+.filter-controls div[style*="display: flex"] {
+    display: flex;
+    gap: 10px;
+    height: 48px; /* Altura exata dos selects para alinhar */
+}
+:root {
+    --vivo-purple: #660099;
+    --vivo-purple-light: #8b5cf6;
+    --vivo-gradient: linear-gradient(135deg, #660099 0%, #8b5cf6 100%);
+    --bg-dark: #0f172a;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #660099 0%, #8b5cf6 50%, #a855f7 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--text-main);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 30px;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(102, 0, 153, 0.3);
+}
+
+/* --- LOADING SCREEN --- */
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--vivo-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    border-top: 4px solid #ffffff;
+    border-radius: 50%;
+    animation: spin 1s cubic-bezier(0.6, 0.2, 0.1, 1) infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- HEADER --- */
+.header {
+    background: var(--vivo-gradient);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(102, 0, 153, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.logo-telebrasil {
+    height: 100px;
+    background: white;
+    padding: 1px;
+    border-radius: 18px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.logo-telebrasil:hover { transform: scale(1.05); }
+
+/* --- STATS CARDS --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 18px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: 0.3s ease;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 5px;
+}
+
+/* --- GRÁFICOS --- */
+.charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin: 30px 0;
+}
+
+.card-chart {
+    background: white;
+    padding: 25px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+    
+    /* Configuração vital para o Chart.js */
+    position: relative; 
+    height: 400px; 
+    width: 100%;
+}
+
+.card-chart h4 {
+    margin-bottom: 20px;
+    color: var(--vivo-purple);
+    font-weight: 700;
+}
+
+/* Força o canvas a ocupar o espaço interno do card */
+.card-chart canvas {
+    /* Remove as restrições de proporção */
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+/* --- CONTROLS & FILTERS --- */
+.controls, .filters-section {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+    border: 1px solid #f1f5f9;
+}
+
+.search-input {
+    width: 100%;
+    padding: 15px 20px 15px 50px;
+    border: 2px solid #f1f5f9;
+    border-radius: 15px;
+    background: #f8fafc;
+    transition: 0.3s;
+}
+
+.search-input:focus {
+    border-color: var(--vivo-purple-light);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+}
+
+.filter-btn {
+    background: #f8fafc;
+    border: 2px solid #f1f5f9;
+    padding: 15px;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+    text-align: left;
+}
+
+.filter-btn:hover {
+    border-color: var(--vivo-purple-light);
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: var(--vivo-gradient);
+    color: white;
+    border-color: var(--vivo-purple);
+    box-shadow: 0 10px 20px rgba(102, 0, 153, 0.2);
+}
+
+/* --- CLIENT CARDS --- */
+.clients-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.client-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    transition: 0.4s ease;
+    border-top: 5px solid var(--vivo-purple);
+}
+
+.client-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(102, 0, 153, 0.1);
+}
+
+.client-name {
+    color: var(--vivo-purple);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.recommendation-text {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    border-left: 4px solid var(--vivo-purple-light);
+    white-space: pre-wrap;
+    margin-top: 15px;
+}
+
+/* --- BOTÕES --- */
+.export-btn, .action-btn {
+    background: var(--vivo-gradient);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.export-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+
+.logout-btn {
+    background: rgba(255, 71, 87, 0.1);
+    color: #ff4757;
+    border: 1px solid rgba(255, 71, 87, 0.2);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;   
+    cursor: pointer;
+}
+
+.logout-btn:hover { background: #ff4757; color: white; }
+
+/* --- PESQUISA --- */
+/* Responsividade */
+@media (max-width: 768px) {
+    .container { padding: 15px; }
+    .charts-section { grid-template-columns: 1fr; }
+    .card-chart { height: 300px; }
+}
+
+/* Container relativo para posicionar a lupa */
+.search-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Posicionamento da Lupa */
+.search-icon {
+    position: absolute;
+    left: 18px; /* Distância da borda esquerda */
+    color: var(--vivo-purple);
+    font-size: 1.2rem;
+    pointer-events: none; /* Garante que o clique passe para o input */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* Ajuste no Input para não sobrepor o texto ao ícone */
+.search-input {
+    width: 100%;
+    padding: 15px 20px 15px 50px !important; /* O padding-left (50px) abre espaço para a lupa */
+    border: 2px solid #f1f5f9;
+    border-radius: 15px;
+    background: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    border-color: var(--vivo-purple-light);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(102, 0, 153, 0.1);
+}
