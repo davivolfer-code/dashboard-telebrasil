@@ -18,35 +18,6 @@ Sistema de dashboard inteligente com visual moderno e funcionalidade de **upload
 
 ---
 
-## 📂 Estrutura de Pastas
-
-Dashboard/
-├── main.py # App Flask
-├── requirements.txt # Dependências
-├── templates/
-│ └── dashboard.html # HTML principal
-├── static/
-│ ├── styles.css # Estilo do dashboard
-│ └── script.js # Lógica dos filtros
-├── dados/
-│ └── clientes.json # Dados atualizados a partir do upload
-├── uploads/
-│ └── (planilhas .xlsx)
-
-
----
-
-## 📥 Como usar
-
-1. Acesse o sistema em:  
-   🔗 [`https://dashboard-vivo.onrender.com`](https://dashboard-vivo.onrender.com)
-
-2. Faça upload da planilha `.xlsx` (modelo padrão com colunas como `RAZAO_SOCIAL`, `TP_PRODUTO`, `CLUSTER`, etc.)
-
-3. Os dados são convertidos em JSON e usados automaticamente no painel.
-
----
-
 ## 📌 Tecnologias utilizadas
 
 - Python 3.13
@@ -58,12 +29,12 @@ Dashboard/
 
 ---
 
-## 🙋‍♀️ Desenvolvido por
+## 🙋Desenvolvido por
 
-**Franciele Melo**  
+**Davi Fernandes**  
 🌐 Vendedora Vivo Empresas, apaixonada por tecnologia, IA e organização.  
-📧 francielemelovieira@gmail.com  
-🔗 [linkedin.com/in/francielemelo](https://linkedin.com/in/francielemelo)
+📧 davivolfer@gmail.com  
+🔗 [https://www.linkedin.com/in/davi-fernandes-geraldo-28897b2ab/]
 
 ---
 
