@@ -276,17 +276,26 @@ function atualizarContadores(res) {
     if (totalEl) totalEl.textContent = res.length;
 }
 
-function popularFiltroConsultores() {
+async function popularFiltroConsultores() {
     const select = document.getElementById('consultor-filter');
     if (!select) return;
-    const lista = [...new Set(clientesData.map(c => c.consultor))].sort();
-    select.innerHTML = '<option value="">Todos os Consultores</option>';
-    lista.forEach(con => {
-        const opt = document.createElement('option');
-        opt.value = con;
-        opt.textContent = con;
-        select.appendChild(opt);
-    });
+
+    try {
+        const response = await fetch('/api/filtros');
+        const data = await response.json();
+        
+        select.innerHTML = '<option value="">Todos os Consultores</option>';
+        if (data.consultores) {
+            data.consultores.forEach(con => {
+                const opt = document.createElement('option');
+                opt.value = con;
+                opt.textContent = con;
+                select.appendChild(opt);
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao carregar consultores:", error);
+    }
 }
 
 function inicializarEventListeners() {
