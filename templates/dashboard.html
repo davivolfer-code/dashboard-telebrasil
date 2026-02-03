@@ -78,13 +78,17 @@
           </div>
         </div>
 
-        <div class="filter-controls">
-          <div class="filter-group">
-            <label>Consultor Responsável</label>
-            <select id="consultor-filter">
-              <option value="">Todos os Consultores</option>
-            </select>
-          </div>
+<form method="GET" action="/">
+    <label for="consultor">Consultor Responsável:</label>
+    <select name="consultor" id="consultor" onchange="this.form.submit()">
+        <option value="Todos">Todos os Consultores</option>
+        {% for nome in lista_consultores %}
+            <option value="{{ nome }}" {% if nome == consultor_selecionado %}selected{% endif %}>
+                {{ nome }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
 
           <div style="display: flex; gap: 10px;">
             <button id="export-btn" class="export-btn" title="Exportar para iHelp">

@@ -21,7 +21,7 @@ JSON_PATH = os.path.join(DADOS_FOLDER, 'clientes.json')
 os.makedirs(DADOS_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# 2. POPULAR O DICIONÁRIO DE USUÁRIOS LOGO APÓS O LOAD
+# POPULAR O DICIONÁRIO DE USUÁRIOS
 usuarios = {}
 for key, value in os.environ.items():
     if key.startswith("USER_"):
@@ -67,6 +67,7 @@ def upload():
     file.save(filepath)
     
     try:
+        # Detecta separador automaticamente para CSVs
         if filename.endswith(('.xlsx', '.xls')):
             df = pd.read_excel(filepath, dtype=str)
         else:
@@ -74,6 +75,7 @@ def upload():
         
         df.columns = [str(c).strip().upper() for c in df.columns]
 
+        # MAPEAMENTO ATUALIZADO: Usando 'CONSULTORES' conforme seu CSV
         mapeamento = {
             'NM_CLIENTE': 'nome', 
             'NR_CNPJ': 'cnpj',
@@ -82,7 +84,7 @@ def upload():
             'SITUACAO_RECEITA': 'situacao', 
             'RECOMENDACAO': 'recomendacao', 
             'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
-            'NOME DO CONSULTOR': 'consultor',
+            'CONSULTORES': 'consultor', # <--- Alteração principal aqui
             'VENCIMENTO': 'vencimento',
             'DATA_FIM_VTECH': 'data_fim_vtech',
             'VIVO_TECH': 'vivo_tech',
@@ -107,23 +109,41 @@ def upload():
             'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa',
         ]
 
+        # Garantir que todas as colunas existam
         for col in colunas_final:
             if col not in df_json.columns:
                 df_json[col] = ""
 
-        # Conversão numérica para o Chart.js
+        # Limpeza e conversão
         df_json['m_movel'] = pd.to_numeric(df_json['m_movel'], errors='coerce').fillna(0).astype(int)
         df_json['m_fixa'] = pd.to_numeric(df_json['m_fixa'], errors='coerce').fillna(0).astype(int)
-
         df_json['cnpj'] = df_json['cnpj'].apply(limpa_id)
         df_json['cd_pessoa'] = df_json['cd_pessoa'].apply(limpa_id)
         
+        # Limpar espaços em branco nos nomes dos consultores para o filtro não falhar
+        df_json['consultor'] = df_json['consultor'].str.strip()
+
         dados = df_json[colunas_final].fillna("").to_dict(orient='records')
         
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(dados, f, ensure_ascii=False, indent=4)
             
         return jsonify({"mensagem": "Upload concluído!", "status": "ok"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+# ROTA PARA ENVIAR A LISTA DE CONSULTORES PARA O FILTRO DO FRONTEND
+@app.route('/api/filtros')
+def get_filtros():
+    try:
+        if not os.path.exists(JSON_PATH):
+            return jsonify({"consultores": []})
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            dados = json.load(f)
+        
+        # Extrai nomes únicos de consultores, remove vazios e ordena
+        consultores = sorted(list(set(d['consultor'] for d in dados if d['consultor'])))
+        return jsonify({"consultores": consultores})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
