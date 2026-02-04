@@ -1,0 +1,228 @@
+
+📅 RESUMO DE REGISTROS CRM — 10/12/2025
+
+1️⃣ Jose Bezerra da Silva Filho - CNPJ 18.533.472/0001-75
+   Status: Pós-venda | Proxima ação: 10/08/2026
+   Situação: Fatura enviada, migração móvel agendada M17.
+   Cidade: Cajobi
+
+2️⃣ Amanda Santana Ferrari - CNPJ 51.141.946/0001-09
+   Status: Pós-venda | Proxima ação: 10/02/2026
+   Situação: Transferência de titularidade em trâmite, acompanhamento ativo.
+
+3️⃣ Fantástico Alimentos LTDA - CNPJ 46.686.465/0002-20
+   Status: Em negociação | Próxima ação: 11/12/2025
+   Situação: Linha metálica desligada, aguardando retorno técnico Sérgio.
+
+4️⃣ Centro de Desenvolvimento Humano Codogno LTDA - CNPJ 10.579.263/0001-50
+   Status: Aguardando cliente | Próxima ação: 11/12/2025
+   Situação: Portabilidade pendente, cliente deve trocar chip na TIM.
+
+5️⃣ RG Saúde Administradora de Benefícios LTDA - CNPJ 39.870.673/0001-38
+   Status: Em negociação | Próxima ação: 11/12/2025
+   Situação: Aguardando retorno de instalação do VivoVozNegócio.
+
+6️⃣ VETEK Eletricidade LTDA - CNPJ 58.363.854/0001-12
+   Status: Aguardando cliente | Próxima ação: 12/12/2025
+   Situação: DDR transferido, aguardando aceite para migração SIP.
+
+7️⃣ Luz Consultórios Associados LTDA - CNPJ 14.633.225/0001-90
+   Status: Em investigação | Próxima ação: 12/12/2025
+   Situação: Fatura enviada, proposta de upgrade link 50MB analisando planta.
+
+8️⃣ Medicor Diagnóstico LTDA - CNPJ 07.301.303/0001-93
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Migrações fixa e móvel agendadas M7/M17.
+
+9️⃣ Spraycom Comércio de Peças para Agricultura SA - CNPJ 17.765.600/0001-43
+   Status: Pós-venda | Próxima ação: 10/03/2026
+   Situação: SIP ativo desde 02/2025, cliente sem interesse em novos links.
+
+🔟 Green Line Premium Distribuidora Alimentícia LTDA - CNPJ 27.916.282/0001-28
+   Status: Pós-venda | Próxima ação: 11/12/2025
+   Situação: Multa de fibra cancelada, cliente orientado a falar com Maria Fernanda.
+
+11️⃣ Ressolagem Rio Preto LTDA - CNPJ 01.807.237/0001-41
+   Status: Aguardando BKO | Próxima ação: 11/12/2025
+   Situação: Migração VivoVozNegócio + 4 novas linhas em aprovação de alçada.
+
+12️⃣ Preflight Serviços Aeronáuticos LTDA - CNPJ 18.204.555/0001-10
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Vivo Travel Mundo orientado via 10315, análise de oportunidades fibra.
+
+13️⃣ Rosemeire Aparecida Bianchini de Oliveira - CNPJ 09.125.641/0001-47
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Fatura enviada, migração M17 agendada e prospecção de soluções digitais.
+
+14️⃣ PFCNetwork Tecnologia da Informação LTDA - CNPJ 00.636.392/0001-80
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Troca de vencimento via 10315, migrações fixas e móveis futuras.
+
+15️⃣ JPC Agropecuária LTDA - CNPJ 31.042.361/0001-24
+   Status: Em negociação | Próxima ação: 20/01/2026
+   Situação: Troca de licença Office agendada, formulário gestor assinado.
+
+16️⃣ Link Protein LTDA - CNPJ 27.758.004/0001-90
+   Status: Pós-venda | Próxima ação: 10/08/2026
+   Situação: 4 linhas vendidas e contrato refeito, aguardando implantação.
+
+17️⃣ Olie Flow AI LTDA - CNPJ 57.215.227/0001-71
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Entrega de aparelho via FedEx, migrações M7/M17 agendadas.
+
+18️⃣ LRP Clínica Médica LTDA - CNPJ 46.923.895/0001-37
+   Status: Pós-venda | Próxima ação: 10/07/2026
+   Situação: Entrega FedEx até 15/12, migração móvel M17 agendada.
+
+19️⃣ Clínica de Cirurgia Plástica Rio Preto LTDA - CNPJ 04.998.413/0001-68
+   Status: Em negociação | Próxima ação: 12/12/2025
+   Situação: Proposta PABX Modulare enviada, aguardando retorno.
+
+20️⃣ Anzen Clínica Médica e Diagnósticos LTDA - CNPJ 05.948.162/0001-70
+   Status: Aguardando BKO | Próxima ação: 13/12/2025
+   Situação: Agendamento ativação SIP + Link com mantenedor na sexta-feira.
+
+21️⃣ Saint James Barbershop LTDA - CNPJ 22.635.276/0001-89
+   Status: Proposta enviada | Próxima ação: 10/02/2026
+   Situação: Enviado valores de iPhone, revisar migração fixa M13.
+
+
+🗓 Resumo CRM — 11/12/2025
+1️⃣ GVT Serviços Especializados LTDA
+
+CNPJ: 38.056.912/0001-58
+Ação: Cliente Miguel solicitou abertura de chamado técnico para internet.
+Chamado agendado para 12/12 (10h30–12h30) — ordem 8-7kcg17bo, protocolo 111220257377173.
+Possui 4 linhas móveis M10 e 1 M16 → migração programada para M17.
+Fibra M2, migração agendada para M7.
+🔹 Status: Pós-venda ativo, cliente agradeceu e mantém relacionamento positivo.
+
+2️⃣ Primo Rolamentos LTDA
+
+CNPJ: 54.414.883/0001-05
+Ação: Resposta ao e-mail da Sueli, aguardando envio do aceite para o cliente.
+Proposta de SIP 10/50 + link 50MB (R$ 820,00).
+Novo endereço cadastrado: Av. Nove de Julho, 692 – Castelinho, Piracicaba/SP.
+🔹 Status: Aguardando BKO (envio do aceite).
+
+3️⃣ CL Caldeira LTDA
+
+CNPJ: 07.700.596/0001-81
+Ação: Venda realizada de Fibra 500MB (R$ 89,99), porém instalação pendente.
+Vivo informou falta de porta disponível, mas Patrícia intermediou com técnico e obteve liberação provisória.
+🔹 Status: Em tratativa técnica, aguardando andamento do pedido.
+
+4️⃣ Liliane Casseverini Rodrigues Beneduzzi (PJ)
+
+CNPJ: 11.446.292/0001-07
+Ação: Pedido de Fibra 700MB com IP fixo + TT 2 linhas + 1 alta móvel (totalização).
+Cliente precisa baixar linhas CPF para pré-pago.
+Na fixa, Vivo Next não permite TT — consultora ligando para tentar solução.
+🔹 Status: Em análise técnica (BKO).
+
+5️⃣ Link Protein LTDA
+
+CNPJ: 27.758.004/0001-90
+Ação: Pedido de 4 linhas (R$ 39,99 cada) reprovado por erro no nome do diretor.
+Contrato refeito e reenviado ao BKO para tramitação.
+🔹 Status: Pedido reenviado e aguardando BKO.
+➡️ Linhas móveis: M7 (duas no M18 e uma M9) → migração planejada M17.
+Proposta de VVN enviada (sem interesse no momento).
+
+6️⃣ Olie Flow AI LTDA
+
+CNPJ: 57.215.227/0001-71
+Ação: Cliente questionou status de entrega de aparelho → em trânsito via FedEx, limite 11/12.
+Móvel M1 / Fibra M3, migrações agendadas para M17 e M7, respectivamente.
+🔹 Status: Em implantação (aguardando entrega).
+
+7️⃣ LRP Clínica Médica LTDA
+
+CNPJ: 46.923.895/0001-37
+Ação: Mesma situação da Olie (mesmo proprietário Rafael).
+Entrega FedEx com prazo até 15/12.
+🔹 Status: Em implantação, migração móvel agendada M17.
+
+8️⃣ Spraycom Comércio de Peças para Agricultura SA
+
+CNPJ: 17.765.600/0001-43
+Ação: Confirmada migração para SIP em 02/2025 (por Altair).
+Cliente não tem interesse em trocar provedores de internet (mantém dois ativos).
+🔹 Status: Pós-venda estável.
+
+9️⃣ Clínica de Cirurgia Plástica Rio Preto SS LTDA EP
+
+CNPJ: 04.998.413/0001-68
+Ação: Proposta enviada de PABX Modulare (2 linhas / 8 ramais) e VVN.
+Consultora se colocou à disposição para reunião presencial.
+🔹 Status: Em negociação.
+
+10️⃣ Anzen Clínica Médica e Diagnósticos LTDA
+
+CNPJ: 05.948.162/0001-70
+Ação: Sueli solicitou contato com Karine para ativação de SIP + link (agendada para sexta).
+Contato efetuado e aguardando retorno.
+🔹 Status: Em implantação.
+
+11️⃣ Saint James Barbershop LTDA
+
+CNPJ: 22.635.276/0001-89
+Ação: Cliente solicitou valores de iPhone, tabela enviada.
+Fixas M11 (migrar daqui ~2 meses).
+Follow-up realizado, Otávio informou que retoma o assunto em janeiro.
+🔹 Status: Follow-up agendado para 10/01/2026.
+
+12️⃣ Codogno Desenvolvimento Humano LTDA
+
+CNPJ: 10.579.263/0001-50
+Ação: Cliente não recebeu SMS da portabilidade → precisa ir à TIM para troca de chip.
+Follow-up ativo com Sandra e Cíntia, nova tentativa agendada segunda-feira 15/12.
+🔹 Status: Portabilidade em acompanhamento.
+
+13️⃣ Santos & Ramos Sociedade Simples LTDA
+
+CNPJ: 03.760.845/0001-73
+Ação: Proposta de migração da fixa metálica para fibra/VVN, incluindo linha móvel para totalizar.
+🔹 Status: Em negociação, aguardando retorno.
+
+14️⃣ Saint James (atualização)
+
+CNPJ: 22.635.276/0001-89
+Ação: Otávio confirmou que só compra novo iPhone em janeiro se conseguir vender o atual.
+🔹 Status: Follow-up agendado janeiro/2026.
+
+15️⃣ Codogno (atualização)
+
+CNPJ: 10.579.263/0001-50
+Ação: Sandra informou que Cíntia resolverá o chip da TIM no sábado → follow-up segunda (15/12).
+🔹 Status: Aguardando ação do cliente.
+
+16️⃣ Claudelino Rezende de Jesus Filho
+
+CNPJ: 45.789.888/0001-21
+Ação: 3 portabilidades móveis (1 com aparelho).
+Aprovadas no crédito, aguardando input da Rosiane no Corp e SMS de portabilidade.
+🔹 Status: Aguardando BKO.
+
+17️⃣ Fantástico Alimentos LTDA
+
+CNPJ: 46.686.465/0002-20
+Ação: Técnico já migrou DDR → SIP Fibra.
+Proposta enviada de SIP + Link Dedicado + 0800 ilimitado.
+🔹 Status: Aguardando cliente (Fabiano avaliar proposta).
+
+18️⃣ Instituto Pró-Cardíaco Rio Preto LTDA
+
+CNPJ: 09.169.275/0001-28
+Ação: Pedido de câmeras de segurança, cliente pagou entrada e pediu instalação urgente.
+Enviado para Joziane (BKO) liberar desconto e tramitar.
+🔹 Status: Aguardando BKO (implantação).
+
+19️⃣ Rodipel Peças Elétricas LTDA
+
+CNPJ: 57.099.699/0001-06
+Ação: Fechada migração DDR → SIP (linha 16 2101-1515), mantendo valor atual.
+Sueli enviará aceite ao e-mail financeiro@rodipel.com.br
+.
+🔹 Status: Implantação em andamento.
+
