@@ -185,6 +185,34 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
+@app.route('/api/check_cliente', methods=['POST'])
+def check_cliente():
+    if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    
+    dados_req = request.json
+    cnpj_alvo = str(dados_req.get('cnpj'))
+    status_check = dados_req.get('checked') # True ou False
+
+    if not os.path.exists(JSON_PATH):
+        return jsonify({"erro": "Arquivo não encontrado"}), 404
+
+    try:
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            clientes = json.load(f)
+
+        # Atualiza o cliente específico
+        for cliente in clientes:
+            if str(cliente.get('cnpj')) == cnpj_alvo:
+                cliente['checked'] = status_check
+                break
+
+        with open(JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(clientes, f, ensure_ascii=False, indent=4)
+
+        return jsonify({"status": "ok", "message": "Status atualizado"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)

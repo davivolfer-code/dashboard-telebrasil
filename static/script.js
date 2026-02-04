@@ -147,32 +147,35 @@ function renderizarClientes() {
 
     filteredData.forEach(cliente => {
         const card = document.createElement('div');
-        card.className = 'client-card';
+        // ALTERAÇÃO: Adiciona classe 'checked-card' se o cliente estiver marcado
+        card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
+        
         const temAcesso = hasFullAccess(currentUser) || cliente.consultor?.toLowerCase() === currentUser?.toLowerCase();
+        const isChecked = cliente.checked ? 'checked' : '';
 
         const corMovel = cliente.m_movel >= 17 ? '#10b981' : '#64748b';
         const corFixa = cliente.m_fixa >= 7 ? '#10b981' : '#64748b';
 
+        // --- Bloco EXTRA (Mantido) ---
         let htmlCodigoExtra = '';
         const nomeUpper = cliente.nome.toUpperCase();
-        
         if (nomeUpper.includes('EXTRA')) {
             const valorFinal = (cliente.cd_pessoa && cliente.cd_pessoa !== "0" && cliente.cd_pessoa !== "") 
                                ? cliente.cd_pessoa 
                                : "NÃO LOCALIZADO NO JSON";
             
             htmlCodigoExtra = `
-                <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 8px; padding: 10px; margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <span style="font-size: 0.75rem; color: #9f1239; font-weight: 900; letter-spacing: 0.5px;">⚠️ IDENTIFICADO COMO EXTRA</span>
-                        <span style="font-size: 0.6rem; background: #e11d48; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;">SISTEMA VIVO</span>
+                        <span style="font-size: 0.75rem; color: #9f1239; font-weight: 900;">⚠️ IDENTIFICADO COMO EXTRA</span>
                     </div>
-                    <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; color: #be123c; font-weight: 800; text-align: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #fda4af;">
+                    <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; color: #be123c; font-weight: 800; text-align: center;">
                         ID: ${valorFinal}
                     </div>
                 </div>`;
         }
 
+        // --- Bloco Serviços (Mantido) ---
         let htmlServicos = '<div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">';
         if (cliente.ddr === 'SIM' || cliente.vox_digital === 'SIM') {
             const label = cliente.vox_digital === 'SIM' ? 'VOX DIGITAL' : 'DDR';
@@ -182,33 +185,78 @@ function renderizarClientes() {
         if (cliente.sip_voz === 'SIM') htmlServicos += '<span style="background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:10px; font-size:0.65rem; font-weight:800;">🌐 SIP</span>';
         htmlServicos += '</div>';
 
+        // --- HTML DO CARD ATUALIZADO ---
         card.innerHTML = `
-            <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px;">
-                <div style="font-weight: 800; color: #1e293b;">${cliente.nome}</div>
-                <div style="font-size: 0.8rem; color: #64748b;">📍 ${cliente.cidade} | CNPJ: ${formatarCNPJ(cliente.cnpj)}</div>
+            <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 800; color: #1e293b; font-size: 1rem;">${cliente.nome}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">📍 ${cliente.cidade} | CNPJ: ${formatarCNPJ(cliente.cnpj)}</div>
+                </div>
+                <div style="margin-left: 10px; text-align: center;">
+                    <input type="checkbox" ${isChecked} 
+                        style="width: 22px; height: 22px; cursor: pointer; accent-color: #660099;" 
+                        onclick="event.stopPropagation(); toggleCheck('${cliente.cnpj}', this.checked)">
+                    <div style="font-size: 0.5rem; font-weight: bold; color: #64748b; margin-top: 2px;">VISTO</div>
+                </div>
             </div>
+
             ${htmlCodigoExtra} 
             ${htmlServicos}
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center;">
-                    <small>MÓVEL</small><br><b style="color:${corMovel}">M ${cliente.m_movel}</b>
+                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; font-weight: bold;">MÓVEL</small><br><b style="color:${corMovel}">M ${cliente.m_movel}</b>
                 </div>
-                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center;">
-                    <small>FIXA</small><br><b style="color:${corFixa}">M ${cliente.m_fixa}</b>
+                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; font-weight: bold;">FIXA</small><br><b style="color:${corFixa}">M ${cliente.m_fixa}</b>
                 </div>
             </div>
+
             ${temAcesso ? `
-                <div style="background:#fffbeb; padding:8px; border-radius:4px; font-size:0.8rem; margin-bottom:10px; border: 1px solid #fde68a;">${cliente.recomendacao}</div>
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <b style="color:#25d366;">${cliente.telefone}</b>
-                    <a href="https://wa.me/55${cliente.telefone.replace(/\D/g, '')}" target="_blank" style="background:#25d366; color:white; padding:4px 8px; border-radius:4px; text-decoration:none; font-size:0.7rem; font-weight:bold;">WhatsApp</a>
+                <div style="background:#fffbeb; padding:10px; border-radius:6px; font-size:0.8rem; margin-bottom:10px; border: 1px solid #fde68a; color: #92400e; font-weight: 500;">
+                    💡 ${cliente.recomendacao}
                 </div>
-            ` : `<div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px;">🔒 Consultor: ${cliente.consultor}</div>`}
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <b style="color:#25d366; font-family: monospace; font-size: 1rem;">${cliente.telefone}</b>
+                    <a href="https://wa.me/55${cliente.telefone.replace(/\D/g, '')}" target="_blank" 
+                       style="background:#25d366; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.75rem; font-weight:bold; box-shadow: 0 2px 4px rgba(37,211,102,0.2);">
+                       WhatsApp
+                    </a>
+                </div>
+            ` : `
+                <div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px; background: #f1f5f9; border-radius: 6px;">
+                    🔒 Consultor: ${cliente.consultor}
+                </div>
+            `}
         `;
         container.appendChild(card);
     });
 }
 
+// FUNÇÃO PARA ENVIAR O CHECK PARA O SERVIDOR
+async function toggleCheck(cnpj, isChecked) {
+    try {
+        const response = await fetch('/api/check_cliente', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cnpj: cnpj, checked: isChecked })
+        });
+        
+        if (response.ok) {
+            // Atualiza os dados locais para manter a interface rápida
+            const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
+            if (cliente) {
+                cliente.checked = isChecked;
+                // Re-aplica os filtros para atualizar a cor do card na tela
+                aplicarFiltros(); 
+            }
+        } else {
+            alert("Erro ao salvar status. Verifique sua conexão.");
+        }
+    } catch (error) {
+        console.error("Erro no fetch do check:", error);
+    }
+}
 // ================== FUNÇÃO DOS GRÁFICOS ==================
 function atualizarGraficos(dados) {
     const ctxSituacao = document.getElementById('chartSituacao')?.getContext('2d');
