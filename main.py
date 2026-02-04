@@ -14,7 +14,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
-# CONFIGURAÇÃO IA - Ajustada para usar a API estável
+# --- ALTERAÇÃO 1: CONFIGURAÇÃO SIMPLIFICADA ---
+# Remova qualquer menção a versões beta ou configurações complexas aqui
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -36,9 +37,7 @@ def limpa_id(v):
     num = re.sub(r"\D", "", str(v))
     return num.lstrip('0')
 
-# --- FUNÇÕES DE APOIO IA ---
 def carregar_contexto_arquivos():
-    """Lê os manuais de estratégia da base de conhecimento"""
     conteudo = ""
     arquivos = ['guia_unificado_inteligencia.txt', 'mig_estrategia_operacional.txt']
     for arq in arquivos:
@@ -74,7 +73,7 @@ def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=session['usuario'])
 
-# --- ROTA DE CHAT IA CORRIGIDA ---
+# --- ALTERAÇÃO 2: ROTA DE CHAT COM FALLBACK ---
 @app.route('/chat', methods=['POST'])
 def chat():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -86,43 +85,38 @@ def chat():
         if not pergunta_usuario:
             return jsonify({"response": "Por favor, digite uma pergunta."})
         
-        # 1. Busca manuais de estratégia
         contexto_estrategico = carregar_contexto_arquivos()
         
-        # 2. Busca dados dos clientes atuais
-        dados_clientes = "Nenhum dado de cliente carregado."
+        dados_clientes = "Nenhum dado de cliente disponível."
         if os.path.exists(JSON_PATH):
             with open(JSON_PATH, 'r', encoding='utf-8') as f:
-                dados_clientes = f.read()[:9000] # Limite para evitar erro de tokens
+                dados_clientes = f.read()[:7000] 
 
-        # MODELO: Alterado para 'models/gemini-1.5-flash' para evitar erro 404/v1beta
-        model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+        # Tentamos o modelo Flash sem o prefixo "models/". 
+        # Se o erro 404 persistir, o problema é na permissão da sua Chave API.
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt_sistema = f"""
-        Você é o Vivonauta Pulse, especialista comercial da Vivo Empresas.
-        
-        BASE DE CONHECIMENTO (ESTRATÉGIAS):
-        {contexto_estrategico}
-        
-        DADOS DA BASE DE CLIENTES:
-        {dados_clientes}
-        
-        Sua missão é ajudar o consultor a identificar oportunidades de migração e vendas.
-        Use os manuais para dar argumentos de vendas e o JSON para citar clientes.
-        Responda de forma direta e comercial.
+        Você é o Vivonauta Pulse, assistente da Vivo Empresas.
+        CONTEXTO COMERCIAL: {contexto_estrategico}
+        DADOS CLIENTES: {dados_clientes}
+        Responda de forma curta e profissional.
         """
 
-        response = model.generate_content([prompt_sistema, f"Pergunta: {pergunta_usuario}"])
+        # Usando apenas uma string simples para o conteúdo para máxima compatibilidade
+        response = model.generate_content(f"{prompt_sistema}\n\nPergunta: {pergunta_usuario}")
         
         if response and response.text:
             return jsonify({"response": response.text})
         else:
-            return jsonify({"response": "Recebi sua mensagem, mas não consegui processar uma resposta no momento."})
+            return jsonify({"response": "IA sem resposta. Verifique os logs."})
 
     except Exception as e:
-        print(f"ERRO CHAT: {str(e)}")
-        return jsonify({"erro": str(e)}), 500
+        print(f"ERRO CRÍTICO: {str(e)}")
+        # Se der erro 404 aqui, tente trocar 'gemini-1.5-flash' por 'gemini-pro' no código acima
+        return jsonify({"erro": f"Erro na conexão com o Google: {str(e)}"}), 500
 
+# --- O RESTANTE DO CÓDIGO (UPLOAD E FILTROS) PERMANECE IGUAL ---
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -142,27 +136,15 @@ def upload():
         df.columns = [str(c).strip().upper() for c in df.columns]
 
         mapeamento = {
-            'NM_CLIENTE': 'nome', 
-            'NR_CNPJ': 'cnpj',
-            'DS_ID_CIDADE': 'cidade',
-            'DS_CIDADE': 'cidade',
-            'SITUACAO_RECEITA': 'situacao', 
-            'RECOMENDACAO': 'recomendacao', 
-            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
-            'CONSULTORES': 'consultor',
-            'VENCIMENTO': 'vencimento',
-            'DATA_FIM_VTECH': 'data_fim_vtech',
-            'VIVO_TECH': 'vivo_tech',
-            'M_MOVEL': 'm_movel', 
-            'M_FIXA': 'm_fixa',
-            'TP_PRODUTO': 'tp_produto',
-            'QT_BASICA_TERM_METALICO': 'term_metalico',
-            'DS_DISPONIBILIDADE': 'disponibilidade',
-            'DDR': 'ddr',
-            '0800': 'zero800',
-            'SIP_VOZ': 'sip_voz',
-            'VOX_DIGITAL': 'vox_digital',
-            'CD_PESSOA': 'cd_pessoa'
+            'NM_CLIENTE': 'nome', 'NR_CNPJ': 'cnpj', 'DS_ID_CIDADE': 'cidade',
+            'DS_CIDADE': 'cidade', 'SITUACAO_RECEITA': 'situacao', 
+            'RECOMENDACAO': 'recomendacao', 'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
+            'CONSULTORES': 'consultor', 'VENCIMENTO': 'vencimento',
+            'DATA_FIM_VTECH': 'data_fim_vtech', 'VIVO_TECH': 'vivo_tech',
+            'M_MOVEL': 'm_movel', 'M_FIXA': 'm_fixa', 'TP_PRODUTO': 'tp_produto',
+            'QT_BASICA_TERM_METALICO': 'term_metalico', 'DS_DISPONIBILIDADE': 'disponibilidade',
+            'DDR': 'ddr', '0800': 'zero800', 'SIP_VOZ': 'sip_voz',
+            'VOX_DIGITAL': 'vox_digital', 'CD_PESSOA': 'cd_pessoa'
         }
 
         df_json = df.rename(columns=mapeamento)
