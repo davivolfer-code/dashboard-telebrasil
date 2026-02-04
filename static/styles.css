@@ -537,9 +537,3 @@ body {
     transform: translateY(-3px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
-
-.filter-btn[onclick*="meus_clientes"] {
-    border-left: 4px solid #660099;
-    font-weight: bold;
-    background: #f3e8ff;
-}

@@ -18,11 +18,6 @@ function hasFullAccess(username) {
 const filtros = [
     { id: 'todos', nome: 'Todos os Clientes', filtro: () => true },
     {
-        id: 'meus_clientes',
-        nome: '👤 Meus Clientes',
-        filtro: (c) => String(c.consultor || '').trim().toUpperCase() === String(currentUser || '').trim().toUpperCase()
-    },
-    {
         id: 'oportunidade_movel',
         nome: 'Móvel Migração',
         filtro: (c) => parseInt(c.m_movel) >= 17 && (c.situacao || '').includes('2 - ATIVA')
@@ -116,8 +111,7 @@ async function carregarDados() {
                 cd_pessoa: String(idPessoa).trim(),
                 recomendacao: String(c.recomendacao || '').trim(),
                 m_movel: parseInt(c.m_movel) || 0,
-                m_fixa: parseInt(c.m_fixa) || 0,
-                checked: c.checked || false // Garante que o status do check seja carregado
+                m_fixa: parseInt(c.m_fixa) || 0
             };
         });
 
@@ -130,32 +124,21 @@ async function carregarDados() {
 
 function aplicarFiltros() {
     let res = clientesData;
-
-    // 1. Filtro por Categoria (Botões Superiores)
     if (currentFilter !== 'todos') {
         const f = filtros.find(x => x.id === currentFilter);
         if (f) res = res.filter(f.filtro);
     }
-
-    // 2. Filtro por Seleção de Consultor (Dropdown lateral)
     if (selectedConsultor) {
-        res = res.filter(c => 
-            String(c.consultor || '').trim().toUpperCase() === String(selectedConsultor).trim().toUpperCase()
-        );
+        res = res.filter(c => c.consultor?.toLowerCase() === selectedConsultor.toLowerCase());
     }
-
-    // 3. Termo de Busca (Nome ou CNPJ)
     if (searchTerm) {
-        res = res.filter(c => 
-            c.nome?.toLowerCase().includes(searchTerm) || 
-            c.cnpj?.toString().includes(searchTerm)
-        );
+        res = res.filter(c => c.nome?.toLowerCase().includes(searchTerm) || c.cnpj?.toString().includes(searchTerm));
     }
     
     filteredData = res;
     renderizarClientes();
     atualizarContadores(res);
-    atualizarGraficos(res);
+    atualizarGraficos(res); // Ativa os gráficos a cada filtro aplicado
 }
 
 function renderizarClientes() {
@@ -165,6 +148,7 @@ function renderizarClientes() {
 
     filteredData.forEach(cliente => {
         const card = document.createElement('div');
+        // ALTERAÇÃO: Adiciona classe 'checked-card' se o cliente estiver marcado
         card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
         
         const temAcesso = hasFullAccess(currentUser) || cliente.consultor?.toLowerCase() === currentUser?.toLowerCase();
@@ -173,6 +157,7 @@ function renderizarClientes() {
         const corMovel = cliente.m_movel >= 17 ? '#10b981' : '#64748b';
         const corFixa = cliente.m_fixa >= 7 ? '#10b981' : '#64748b';
 
+        // --- Bloco EXTRA (Mantido) ---
         let htmlCodigoExtra = '';
         const nomeUpper = cliente.nome.toUpperCase();
         if (nomeUpper.includes('EXTRA')) {
@@ -191,6 +176,7 @@ function renderizarClientes() {
                 </div>`;
         }
 
+        // --- Bloco Serviços (Mantido) ---
         let htmlServicos = '<div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">';
         if (cliente.ddr === 'SIM' || cliente.vox_digital === 'SIM') {
             const label = cliente.vox_digital === 'SIM' ? 'VOX DIGITAL' : 'DDR';
@@ -200,6 +186,7 @@ function renderizarClientes() {
         if (cliente.sip_voz === 'SIM') htmlServicos += '<span style="background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:10px; font-size:0.65rem; font-weight:800;">🌐 SIP</span>';
         htmlServicos += '</div>';
 
+        // --- HTML DO CARD ATUALIZADO ---
         card.innerHTML = `
             <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
                 <div style="flex: 1;">
@@ -247,6 +234,7 @@ function renderizarClientes() {
     });
 }
 
+// FUNÇÃO PARA ENVIAR O CHECK PARA O SERVIDOR
 async function toggleCheck(cnpj, isChecked) {
     try {
         const response = await fetch('/api/check_cliente', {
@@ -256,25 +244,28 @@ async function toggleCheck(cnpj, isChecked) {
         });
         
         if (response.ok) {
+            // Atualiza os dados locais para manter a interface rápida
             const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
             if (cliente) {
                 cliente.checked = isChecked;
+                // Re-aplica os filtros para atualizar a cor do card na tela
                 aplicarFiltros(); 
             }
         } else {
-            alert("Erro ao salvar status.");
+            alert("Erro ao salvar status. Verifique sua conexão.");
         }
     } catch (error) {
         console.error("Erro no fetch do check:", error);
     }
 }
-
+// ================== FUNÇÃO DOS GRÁFICOS ==================
 function atualizarGraficos(dados) {
     const ctxSituacao = document.getElementById('chartSituacao')?.getContext('2d');
     const ctxCidades = document.getElementById('chartCidades')?.getContext('2d');
 
     if (!ctxSituacao || !ctxCidades) return;
 
+    // --- GRÁFICO 1: SITUAÇÃO DA BASE (Pizza/Doughnut) ---
     const contagemSituacao = dados.reduce((acc, c) => {
         const sit = c.situacao || 'NÃO INFORMADO';
         acc[sit] = (acc[sit] || 0) + 1;
@@ -295,12 +286,14 @@ function atualizarGraficos(dados) {
         options: { responsive: true, maintainAspectRatio: false }
     });
 
+    // --- GRÁFICO 2: TOP 5 CIDADES (Barras) ---
     const contagemCidades = dados.reduce((acc, c) => {
         const cid = c.cidade || 'OUTROS';
         acc[cid] = (acc[cid] || 0) + 1;
         return acc;
     }, {});
 
+    // Ordena e pega as 5 maiores
     const topCidades = Object.entries(contagemCidades)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
@@ -324,6 +317,8 @@ function atualizarGraficos(dados) {
         }
     });
 }
+
+// ================== FUNÇÕES AUXILIARES ==================
 
 function atualizarContadores(res) {
     const totalEl = document.getElementById('total-clientes');
@@ -386,8 +381,7 @@ function formatarCNPJ(cnpj) {
     let s = cnpj.toString().replace(/\D/g, '').padStart(14, '0');
     return s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
 }
-
-// ================== FUNÇÕES DO CHAT IA ==================
+// ================== FUNÇÕES DO CHAT IA (VIVONAUTA) ==================
 
 function toggleChat() {
     const chatBox = document.getElementById('chat-box');
@@ -399,11 +393,14 @@ function toggleChat() {
 async function sendChatMessage() {
     const input = document.getElementById('chat-input-field');
     const message = input.value.trim();
+    
     if (!message) return;
 
+    // 1. Adiciona a mensagem do usuário na tela
     appendMsg(message, 'user');
     input.value = '';
 
+    // 2. Cria um ID temporário para o balão de "carregando"
     const tempId = 'loading-' + Date.now();
     appendMsg("Analisando base de dados...", 'ai', tempId);
 
@@ -413,26 +410,44 @@ async function sendChatMessage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ message: message })
         });
+        
         const data = await response.json();
+        
+        // 3. Remove o balão de "carregando"
         const loadingMsg = document.getElementById(tempId);
         if (loadingMsg) loadingMsg.remove();
 
-        if (data.response) appendMsg(data.response, 'ai');
-        else if (data.erro) appendMsg("⚠️ Erro: " + data.erro, 'ai');
+        // 4. TRATAMENTO DO ERRO/UNDEFINED
+        // Se o Python retornar 'response', usamos ele. Se retornar 'erro', avisamos.
+        if (data.response) {
+            appendMsg(data.response, 'ai');
+        } else if (data.erro) {
+            appendMsg("⚠️ Erro na IA: " + data.erro, 'ai');
+        } else {
+            appendMsg("Ops, recebi um formato de resposta estranho.", 'ai');
+        }
+
     } catch (error) {
         const loadingMsg = document.getElementById(tempId);
         if (loadingMsg) loadingMsg.remove();
-        appendMsg("Erro de conexão.", 'ai');
+        appendMsg("Erro de conexão. Verifique se o servidor está ativo.", 'ai');
+        console.error("Erro no Chat:", error);
     }
 }
 
 function appendMsg(text, side, id = null) {
     const logs = document.getElementById('chat-logs');
     if (!logs) return;
+    
     const div = document.createElement('div');
     div.className = `chat-msg ${side}`;
     if (id) div.id = id;
+    
+    // Usamos innerText para segurança, ou simplificamos para converter Markdown básico se quiser
     div.innerText = text;
+    
     logs.appendChild(div);
+    
+    // Scroll automático para a última mensagem
     logs.scrollTop = logs.scrollHeight;
 }

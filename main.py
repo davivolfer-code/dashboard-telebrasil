@@ -14,7 +14,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
-# CONFIGURAÇÃO IA
+# --- ALTERAÇÃO 1: CONFIGURAÇÃO SIMPLIFICADA ---
+# Remova qualquer menção a versões beta ou configurações complexas aqui
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -45,7 +46,8 @@ def carregar_contexto_arquivos():
             try:
                 with open(caminho, 'r', encoding='utf-8') as f:
                     conteudo += f"\n--- {arq} ---\n" + f.read()
-            except: continue
+            except:
+                continue
     return conteudo
 
 @app.route('/')
@@ -71,9 +73,12 @@ def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=session['usuario'])
 
+# --- ALTERAÇÃO 2: ROTA DE CHAT COM FALLBACK ---
 @app.route('/chat', methods=['POST'])
 def chat():
-    if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    if 'usuario' not in session: 
+        return jsonify({"erro": "Não autorizado"}), 401
+    
     try:
         dados_requisicao = request.json
         pergunta_usuario = dados_requisicao.get('message', '')
@@ -82,9 +87,12 @@ def chat():
         if os.path.exists(JSON_PATH):
             with open(JSON_PATH, 'r', encoding='utf-8') as f:
                 dados_clientes = f.read()[:7000]
-        else: dados_clientes = "Sem dados."
+        else:
+            dados_clientes = "Sem dados."
 
+        # Lista de tentativas de modelos (do mais novo ao mais compatível)
         modelos_para_testar = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
+        
         response = None
         erro_final = ""
 
@@ -94,18 +102,19 @@ def chat():
                 response = model.generate_content(
                     f"Atue como Vivonauta Pulse. Contexto: {contexto_estrategico}\nDados: {dados_clientes}\nPergunta: {pergunta_usuario}"
                 )
-                if response: break
+                if response: break # Se funcionou, para o loop
             except Exception as e:
                 erro_final = str(e)
-                continue
+                continue # Tenta o próximo modelo da lista
 
         if response and response.text:
             return jsonify({"response": response.text})
         else:
-            return jsonify({"response": f"Erro de conexão: {erro_final}"})
+            return jsonify({"response": f"Não consegui conectar com os modelos do Google. Erro: {erro_final}"})
+
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-
+# --- O RESTANTE DO CÓDIGO (UPLOAD E FILTROS) PERMANECE IGUAL ---
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -142,13 +151,11 @@ def upload():
         for col in colunas_final:
             if col not in df_json.columns: df_json[col] = ""
 
-        # --- ALTERAÇÃO: LIMPEZA DA COLUNA CONSULTOR ---
-        df_json['consultor'] = df_json['consultor'].fillna("NÃO INFORMADO").str.strip().str.upper()
-        
         df_json['m_movel'] = pd.to_numeric(df_json['m_movel'], errors='coerce').fillna(0).astype(int)
         df_json['m_fixa'] = pd.to_numeric(df_json['m_fixa'], errors='coerce').fillna(0).astype(int)
         df_json['cnpj'] = df_json['cnpj'].apply(limpa_id)
         df_json['cd_pessoa'] = df_json['cd_pessoa'].apply(limpa_id)
+        df_json['consultor'] = df_json['consultor'].str.strip()
 
         dados = df_json[colunas_final].fillna("").to_dict(orient='records')
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
@@ -164,11 +171,8 @@ def get_filtros():
         if not os.path.exists(JSON_PATH): return jsonify({"consultor": []})
         with open(JSON_PATH, 'r', encoding='utf-8') as f:
             dados = json.load(f)
-        
-        # --- ALTERAÇÃO: FILTRO DE CONSULTOR MAIS INTELIGENTE ---
-        # Pega nomes únicos, limpa e remove o que for vazio
-        consultores = sorted(list(set(str(d.get('consultor', '')).strip() for d in dados if d.get('consultor'))))
-        return jsonify({"consultor": consultores})
+        consultor = sorted(list(set(d['consultor'] for d in dados if d['consultor'])))
+        return jsonify({"consultor": consultor})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
@@ -184,21 +188,28 @@ def logout():
 @app.route('/api/check_cliente', methods=['POST'])
 def check_cliente():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    
     dados_req = request.json
     cnpj_alvo = str(dados_req.get('cnpj'))
-    status_check = dados_req.get('checked')
+    status_check = dados_req.get('checked') # True ou False
 
-    if not os.path.exists(JSON_PATH): return jsonify({"erro": "Arquivo não encontrado"}), 404
+    if not os.path.exists(JSON_PATH):
+        return jsonify({"erro": "Arquivo não encontrado"}), 404
+
     try:
         with open(JSON_PATH, 'r', encoding='utf-8') as f:
             clientes = json.load(f)
+
+        # Atualiza o cliente específico
         for cliente in clientes:
             if str(cliente.get('cnpj')) == cnpj_alvo:
                 cliente['checked'] = status_check
                 break
+
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(clientes, f, ensure_ascii=False, indent=4)
-        return jsonify({"status": "ok"})
+
+        return jsonify({"status": "ok", "message": "Status atualizado"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
