@@ -3,7 +3,7 @@ import re
 import json
 import pandas as pd
 import numpy as np
-import google.generativeai as genai  # <--- NOVA BIBLIOTECA
+import google.generativeai as genai 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -14,8 +14,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
-# CONFIGURAÇÃO IA
-genai.configure(api_key=os.getenv("GEMINI_API_KEY")) # <--- USA A CHAVE QUE VOCÊ CRIOU
+# CONFIGURAÇÃO IA - Ajustada para usar a API estável
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DADOS_FOLDER = os.path.join(BASE_DIR, 'dados')
@@ -38,14 +38,17 @@ def limpa_id(v):
 
 # --- FUNÇÕES DE APOIO IA ---
 def carregar_contexto_arquivos():
-    """Lê os manuais de estratégia que você subiu para a base de conhecimento"""
+    """Lê os manuais de estratégia da base de conhecimento"""
     conteudo = ""
     arquivos = ['guia_unificado_inteligencia.txt', 'mig_estrategia_operacional.txt']
     for arq in arquivos:
         caminho = os.path.join(BASE_DIR, arq)
         if os.path.exists(caminho):
-            with open(caminho, 'r', encoding='utf-8') as f:
-                conteudo += f"\n--- {arq} ---\n" + f.read()
+            try:
+                with open(caminho, 'r', encoding='utf-8') as f:
+                    conteudo += f"\n--- {arq} ---\n" + f.read()
+            except:
+                continue
     return conteudo
 
 @app.route('/')
@@ -71,37 +74,53 @@ def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=session['usuario'])
 
-# --- ROTA DE CHAT IA ---
+# --- ROTA DE CHAT IA CORRIGIDA ---
 @app.route('/chat', methods=['POST'])
 def chat():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
     
-    dados_requisicao = request.json
-    pergunta_usuario = dados_requisicao.get('message', '')
-    
-    # 1. Busca manuais de estratégia
-    contexto_estrategico = carregar_contexto_arquivos()
-    
-    # 2. Busca dados dos clientes atuais
-    dados_clientes = ""
-    if os.path.exists(JSON_PATH):
-        with open(JSON_PATH, 'r', encoding='utf-8') as f:
-            dados_clientes = f.read()[:8000] # Limite de segurança
-
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    
-    prompt_sistema = f"""
-    Você é o Vivonauta Pulse, especialista comercial da Vivo Empresas.
-    Use esta base de conhecimento: {contexto_estrategico}
-    Use estes dados de clientes: {dados_clientes}
-    Sua missão é ajudar o consultor a identificar oportunidades de migração e vendas.
-    Responda de forma direta e comercial.
-    """
-
     try:
-        response = model.generate_content(prompt_sistema + "\n\nPergunta: " + pergunta_usuario)
-        return jsonify({"response": response.text})
+        dados_requisicao = request.json
+        pergunta_usuario = dados_requisicao.get('message', '')
+
+        if not pergunta_usuario:
+            return jsonify({"response": "Por favor, digite uma pergunta."})
+        
+        # 1. Busca manuais de estratégia
+        contexto_estrategico = carregar_contexto_arquivos()
+        
+        # 2. Busca dados dos clientes atuais
+        dados_clientes = "Nenhum dado de cliente carregado."
+        if os.path.exists(JSON_PATH):
+            with open(JSON_PATH, 'r', encoding='utf-8') as f:
+                dados_clientes = f.read()[:9000] # Limite para evitar erro de tokens
+
+        # MODELO: Alterado para 'models/gemini-1.5-flash' para evitar erro 404/v1beta
+        model = genai.GenerativeModel(model_name='models/gemini-1.5-flash')
+        
+        prompt_sistema = f"""
+        Você é o Vivonauta Pulse, especialista comercial da Vivo Empresas.
+        
+        BASE DE CONHECIMENTO (ESTRATÉGIAS):
+        {contexto_estrategico}
+        
+        DADOS DA BASE DE CLIENTES:
+        {dados_clientes}
+        
+        Sua missão é ajudar o consultor a identificar oportunidades de migração e vendas.
+        Use os manuais para dar argumentos de vendas e o JSON para citar clientes.
+        Responda de forma direta e comercial.
+        """
+
+        response = model.generate_content([prompt_sistema, f"Pergunta: {pergunta_usuario}"])
+        
+        if response and response.text:
+            return jsonify({"response": response.text})
+        else:
+            return jsonify({"response": "Recebi sua mensagem, mas não consegui processar uma resposta no momento."})
+
     except Exception as e:
+        print(f"ERRO CHAT: {str(e)}")
         return jsonify({"erro": str(e)}), 500
 
 @app.route('/upload', methods=['POST'])
@@ -122,7 +141,6 @@ def upload():
         
         df.columns = [str(c).strip().upper() for c in df.columns]
 
-        # MAPEAMENTO: Mantive 'CONSULTORES' para bater com seu CSV
         mapeamento = {
             'NM_CLIENTE': 'nome', 
             'NR_CNPJ': 'cnpj',
