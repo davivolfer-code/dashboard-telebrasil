@@ -10,6 +10,7 @@
     padding: 0;
     box-sizing: border-box;
 }
+
 /* Container que agrupa os filtros */
 .filter-controls {
     display: grid;
@@ -36,9 +37,10 @@
 }
 
 /* Customização dos Selects */
-#consultor-filter, 
+#consultor-filter,
 #tipo-informacao {
-    appearance: none; /* Remove a seta padrão do navegador */
+    appearance: none;
+    /* Remove a seta padrão do navegador */
     background-color: #f8fafc;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23660099'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
@@ -57,7 +59,7 @@
 }
 
 /* Efeito ao passar o mouse */
-#consultor-filter:hover, 
+#consultor-filter:hover,
 #tipo-informacao:hover {
     border-color: var(--vivo-purple-light);
     background-color: #ffffff;
@@ -66,7 +68,7 @@
 }
 
 /* Efeito ao clicar/focar */
-#consultor-filter:focus, 
+#consultor-filter:focus,
 #tipo-informacao:focus {
     outline: none;
     border-color: var(--vivo-purple);
@@ -78,8 +80,10 @@
 .filter-controls div[style*="display: flex"] {
     display: flex;
     gap: 10px;
-    height: 48px; /* Altura exata dos selects para alinhar */
+    height: 48px;
+    /* Altura exata dos selects para alinhar */
 }
+
 :root {
     --vivo-purple: #660099;
     --vivo-purple-light: #8b5cf6;
@@ -128,7 +132,11 @@ body {
     animation: spin 1s cubic-bezier(0.6, 0.2, 0.1, 1) infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
 
 /* --- HEADER --- */
 .header {
@@ -155,11 +163,13 @@ body {
     background: white;
     padding: 1px;
     border-radius: 18px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease;
 }
 
-.logo-telebrasil:hover { transform: scale(1.05); }
+.logo-telebrasil:hover {
+    transform: scale(1.05);
+}
 
 /* --- STATS CARDS --- */
 .stats-grid {
@@ -199,12 +209,12 @@ body {
     background: white;
     padding: 25px;
     border-radius: 24px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
     border: 1px solid #f1f5f9;
-    
+
     /* Configuração vital para o Chart.js */
-    position: relative; 
-    height: 400px; 
+    position: relative;
+    height: 400px;
     width: 100%;
 }
 
@@ -223,11 +233,12 @@ body {
 }
 
 /* --- CONTROLS & FILTERS --- */
-.controls, .filters-section {
+.controls,
+.filters-section {
     background: white;
     padding: 30px;
     border-radius: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 25px;
     border: 1px solid #f1f5f9;
 }
@@ -283,7 +294,7 @@ body {
     border-radius: 20px;
     padding: 25px;
     border: 1px solid #f1f5f9;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
     transition: 0.4s ease;
     border-top: 5px solid var(--vivo-purple);
 }
@@ -311,7 +322,8 @@ body {
 }
 
 /* --- BOTÕES --- */
-.export-btn, .action-btn {
+.export-btn,
+.action-btn {
     background: var(--vivo-gradient);
     color: white;
     border: none;
@@ -322,7 +334,10 @@ body {
     transition: 0.3s;
 }
 
-.export-btn:hover { filter: brightness(1.1); transform: translateY(-2px); }
+.export-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
 
 .logout-btn {
     background: rgba(255, 71, 87, 0.1);
@@ -330,18 +345,29 @@ body {
     border: 1px solid rgba(255, 71, 87, 0.2);
     padding: 10px 20px;
     border-radius: 30px;
-    font-weight: 600;   
+    font-weight: 600;
     cursor: pointer;
 }
 
-.logout-btn:hover { background: #ff4757; color: white; }
+.logout-btn:hover {
+    background: #ff4757;
+    color: white;
+}
 
 /* --- PESQUISA --- */
 /* Responsividade */
 @media (max-width: 768px) {
-    .container { padding: 15px; }
-    .charts-section { grid-template-columns: 1fr; }
-    .card-chart { height: 300px; }
+    .container {
+        padding: 15px;
+    }
+
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+
+    .card-chart {
+        height: 300px;
+    }
 }
 
 /* Container relativo para posicionar a lupa */
@@ -355,10 +381,12 @@ body {
 /* Posicionamento da Lupa */
 .search-icon {
     position: absolute;
-    left: 18px; /* Distância da borda esquerda */
+    left: 18px;
+    /* Distância da borda esquerda */
     color: var(--vivo-purple);
     font-size: 1.2rem;
-    pointer-events: none; /* Garante que o clique passe para o input */
+    pointer-events: none;
+    /* Garante que o clique passe para o input */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,7 +396,8 @@ body {
 /* Ajuste no Input para não sobrepor o texto ao ícone */
 .search-input {
     width: 100%;
-    padding: 15px 20px 15px 50px !important; /* O padding-left (50px) abre espaço para a lupa */
+    padding: 15px 20px 15px 50px !important;
+    /* O padding-left (50px) abre espaço para a lupa */
     border: 2px solid #f1f5f9;
     border-radius: 15px;
     background: #f8fafc;
@@ -382,4 +411,113 @@ body {
     background: white;
     outline: none;
     box-shadow: 0 0 0 4px rgba(102, 0, 153, 0.1);
+}
+
+/* --- INTERFACE DO VIVONAUTA PULSE --- */
+#chat-circle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #660099;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+    line-height: 60px;
+    font-size: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 0, 153, 0.4);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+#chat-circle:hover {
+    transform: scale(1.1);
+}
+
+.chat-box {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    z-index: 1000;
+    border: 1px solid #e2e8f0;
+}
+
+.chat-box-header {
+    background: #660099;
+    color: white;
+    padding: 15px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.chat-box-body {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-msg {
+    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    max-width: 85%;
+    word-wrap: break-word;
+}
+
+.chat-msg.ai {
+    background: #ffffff;
+    color: #1e293b;
+    align-self: flex-start;
+    border: 1px solid #e2e8f0;
+}
+
+.chat-msg.user {
+    background: #660099;
+    color: white;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.chat-input {
+    display: flex;
+    padding: 12px;
+    border-top: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 0 0 15px 15px;
+}
+
+.chat-input input {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+.chat-input button {
+    background: #660099;
+    color: white;
+    border: none;
+    padding: 0 15px;
+    margin-left: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }

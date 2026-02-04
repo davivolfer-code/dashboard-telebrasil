@@ -62,7 +62,7 @@
             <span class="stat-label">Cidades</span>
           </div>
           <div class="stat-item">
-            <span class="stat-number" id="consultores">0</span>
+            <span class="stat-number" id="consultor">0</span>
             <span class="stat-label">Consultores</span>
           </div>
         </div>
@@ -78,59 +78,67 @@
           </div>
         </div>
 
-<form method="GET" action="/">
-    <label for="consultor">Consultor Responsável:</label>
-    <select name="consultor" id="consultor" onchange="this.form.submit()">
-        <option value="Todos">Todos os Consultores</option>
-        {% for nome in lista_consultores %}
-            <option value="{{ nome }}" {% if nome == consultor_selecionado %}selected{% endif %}>
-                {{ nome }}
+        <form method="GET" action="/">
+          <label for="consultor">Consultor Responsável:</label>
+          <select name="consultor" id="consultor" onchange="this.form.submit()">
+            <option value="Todos">Todos os Consultores</option>
+            {% for nome in lista_consultores %}
+            <option value="{{ nome }}" {% if nome==consultor_selecionado %}selected{% endif %}>
+              {{ nome }}
             </option>
-        {% endfor %}
-    </select>
-</form>
+            {% endfor %}
+          </select>
+        </form>
 
-          <div style="display: flex; gap: 10px;">
-            <button id="export-btn" class="export-btn" title="Exportar para iHelp">
-              <i class="fa-solid fa-file-excel"></i> iHelp
-            </button>
-            <button onclick="window.location.href='/baixar_planilha'" class="export-btn" style="background: #8b5cf6;">
-              <i class="fa-solid fa-download"></i> Master
-            </button>
-          </div>
+        <div style="display: flex; gap: 10px;">
+          <button id="export-btn" class="export-btn" title="Exportar para iHelp">
+            <i class="fa-solid fa-file-excel"></i> iHelp
+          </button>
+          <button onclick="window.location.href='/baixar_planilha'" class="export-btn" style="background: #8b5cf6;">
+            <i class="fa-solid fa-download"></i> Master
+          </button>
         </div>
-
-        <div style="margin-top: 25px; display: flex; justify-content: center;">
-          <form id="uploadForm" class="upload-area" style="width: 100%; max-width: 600px; padding: 30px; border: 2px dashed #660099; border-radius: 15px; text-align: center; background: #fff;">
-            <h4 style="color: #660099; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i> Atualizar Base Master</h4>
-            <input type="file" name="file" id="file-input" hidden required>
-            <label for="file-input" style="cursor: pointer; color: #94a3b8;">
-              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: #660099;"></i>
-              <p style="font-size: 0.9rem; margin-top: 10px;">Selecione o arquivo Excel/CSV da Planilha Master</p>
-            </label>
-            <button type="submit" class="action-btn" style="max-width: 200px; margin: 20px auto 0; font-size: 0.9rem; background: #660099;">Atualizar Dados</button>
-          </form>
-        </div>
-
-        <section class="charts-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin: 30px 0;">
-          <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
-            <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-chart-pie"></i> Situação da Base</h4>
-            <canvas id="chartSituacao"></canvas>
-          </div>
-          <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
-            <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-map-location-dot"></i> Top 5 Cidades</h4>
-            <canvas id="chartCidades"></canvas>
-          </div>
-        </section>
-
-        <section class="filters-section">
-          <h3><i class="fa-solid fa-bolt"></i> Filtros Inteligentes</h3>
-          <div class="filters-grid" id="filters-container"></div>
-        </section>
-
-        <section class="clients-container" id="clients-container"></section>
       </div>
-    </main>
+
+      <div style="margin-top: 25px; display: flex; justify-content: center;">
+        <form id="uploadForm" class="upload-area"
+          style="width: 100%; max-width: 600px; padding: 30px; border: 2px dashed #660099; border-radius: 15px; text-align: center; background: #fff;">
+          <h4 style="color: #660099; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i> Atualizar Base Master
+          </h4>
+          <input type="file" name="file" id="file-input" hidden required>
+          <label for="file-input" style="cursor: pointer; color: #94a3b8;">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: #660099;"></i>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Selecione o arquivo Excel/CSV da Planilha Master</p>
+          </label>
+          <button type="submit" class="action-btn"
+            style="max-width: 200px; margin: 20px auto 0; font-size: 0.9rem; background: #660099;">Atualizar
+            Dados</button>
+        </form>
+      </div>
+
+      <section class="charts-section"
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin: 30px 0;">
+        <div class="card-chart"
+          style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+          <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-chart-pie"></i> Situação da Base</h4>
+          <canvas id="chartSituacao"></canvas>
+        </div>
+        <div class="card-chart"
+          style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+          <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-map-location-dot"></i> Top 5 Cidades
+          </h4>
+          <canvas id="chartCidades"></canvas>
+        </div>
+      </section>
+
+      <section class="filters-section">
+        <h3><i class="fa-solid fa-bolt"></i> Filtros Inteligentes</h3>
+        <div class="filters-grid" id="filters-container"></div>
+      </section>
+
+      <section class="clients-container" id="clients-container"></section>
+  </div>
+  </main>
   </div>
 
   <script>
@@ -167,9 +175,69 @@
         if (loading) loading.style.display = 'none';
       }
     });
+    function toggleChat() {
+      const chatBox = document.getElementById('chat-box');
+      chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    function handleKeyPress(e) {
+      if (e.key === 'Enter') sendChatMessage();
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input-field');
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage(message, 'user');
+      input.value = '';
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: message })
+        });
+        const data = await response.json();
+        appendMessage(data.response, 'ai');
+      } catch (error) {
+        appendMessage("Erro ao conectar com a IA.", 'ai');
+      }
+    }
+
+    function appendMessage(text, side) {
+      const logs = document.getElementById('chat-logs');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `chat-msg ${side}`;
+      msgDiv.innerText = text;
+      logs.appendChild(msgDiv);
+      logs.scrollTop = logs.scrollHeight;
+    }
   </script>
 
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+
+  <div id="chat-circle" onclick="toggleChat()">
+    <div id="chat-overlay"></div>
+    <span class="chat-icon">🤖</span>
+  </div>
+
+  <div class="chat-box" id="chat-box" style="display: none;">
+    <div class="chat-box-header">
+      Vivonauta Pulse
+      <span class="chat-box-toggle" onclick="toggleChat()">×</span>
+    </div>
+    <div class="chat-box-body">
+      <div class="chat-logs" id="chat-logs">
+        <div class="chat-msg ai">Olá! Sou o Vivonauta. Como posso ajudar com a sua base hoje?</div>
+      </div>
+    </div>
+    <div class="chat-input">
+      <input type="text" id="chat-input-field" placeholder="Pergunte sobre um cliente ou estratégia..."
+        onkeypress="handleKeyPress(event)" />
+      <button onclick="sendChatMessage()" id="chat-submit">Enviar</button>
+    </div>
+  </div>
 </body>
 
 </html>

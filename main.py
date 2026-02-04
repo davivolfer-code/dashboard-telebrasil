@@ -3,6 +3,7 @@ import re
 import json
 import pandas as pd
 import numpy as np
+import google.generativeai as genai  # <--- NOVA BIBLIOTECA
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -13,6 +14,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
+# CONFIGURAÇÃO IA
+genai.configure(api_key=os.getenv("GEMINI_API_KEY")) # <--- USA A CHAVE QUE VOCÊ CRIOU
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DADOS_FOLDER = os.path.join(BASE_DIR, 'dados')
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
@@ -21,7 +25,6 @@ JSON_PATH = os.path.join(DADOS_FOLDER, 'clientes.json')
 os.makedirs(DADOS_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# POPULAR O DICIONÁRIO DE USUÁRIOS
 usuarios = {}
 for key, value in os.environ.items():
     if key.startswith("USER_"):
@@ -32,6 +35,18 @@ def limpa_id(v):
     if pd.isna(v) or str(v).lower() in ['nan', 'null', '']: return ""
     num = re.sub(r"\D", "", str(v))
     return num.lstrip('0')
+
+# --- FUNÇÕES DE APOIO IA ---
+def carregar_contexto_arquivos():
+    """Lê os manuais de estratégia que você subiu para a base de conhecimento"""
+    conteudo = ""
+    arquivos = ['guia_unificado_inteligencia.txt', 'mig_estrategia_operacional.txt']
+    for arq in arquivos:
+        caminho = os.path.join(BASE_DIR, arq)
+        if os.path.exists(caminho):
+            with open(caminho, 'r', encoding='utf-8') as f:
+                conteudo += f"\n--- {arq} ---\n" + f.read()
+    return conteudo
 
 @app.route('/')
 def index():
@@ -56,6 +71,39 @@ def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=session['usuario'])
 
+# --- ROTA DE CHAT IA ---
+@app.route('/chat', methods=['POST'])
+def chat():
+    if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    
+    dados_requisicao = request.json
+    pergunta_usuario = dados_requisicao.get('message', '')
+    
+    # 1. Busca manuais de estratégia
+    contexto_estrategico = carregar_contexto_arquivos()
+    
+    # 2. Busca dados dos clientes atuais
+    dados_clientes = ""
+    if os.path.exists(JSON_PATH):
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            dados_clientes = f.read()[:8000] # Limite de segurança
+
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    
+    prompt_sistema = f"""
+    Você é o Vivonauta Pulse, especialista comercial da Vivo Empresas.
+    Use esta base de conhecimento: {contexto_estrategico}
+    Use estes dados de clientes: {dados_clientes}
+    Sua missão é ajudar o consultor a identificar oportunidades de migração e vendas.
+    Responda de forma direta e comercial.
+    """
+
+    try:
+        response = model.generate_content(prompt_sistema + "\n\nPergunta: " + pergunta_usuario)
+        return jsonify({"response": response.text})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -67,7 +115,6 @@ def upload():
     file.save(filepath)
     
     try:
-        # Detecta separador automaticamente para CSVs
         if filename.endswith(('.xlsx', '.xls')):
             df = pd.read_excel(filepath, dtype=str)
         else:
@@ -75,7 +122,7 @@ def upload():
         
         df.columns = [str(c).strip().upper() for c in df.columns]
 
-        # MAPEAMENTO ATUALIZADO: Usando 'CONSULTORES' conforme seu CSV
+        # MAPEAMENTO: Mantive 'CONSULTORES' para bater com seu CSV
         mapeamento = {
             'NM_CLIENTE': 'nome', 
             'NR_CNPJ': 'cnpj',
@@ -84,7 +131,7 @@ def upload():
             'SITUACAO_RECEITA': 'situacao', 
             'RECOMENDACAO': 'recomendacao', 
             'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
-            'CONSULTORES': 'consultor', # <--- Alteração principal aqui
+            'CONSULTORES': 'consultor',
             'VENCIMENTO': 'vencimento',
             'DATA_FIM_VTECH': 'data_fim_vtech',
             'VIVO_TECH': 'vivo_tech',
@@ -101,30 +148,18 @@ def upload():
         }
 
         df_json = df.rename(columns=mapeamento)
-        
-        colunas_final = [
-            'nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 
-            'telefone', 'm_movel', 'm_fixa', 'tp_produto', 
-            'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade',
-            'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa',
-        ]
+        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 'telefone', 'm_movel', 'm_fixa', 'tp_produto', 'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
 
-        # Garantir que todas as colunas existam
         for col in colunas_final:
-            if col not in df_json.columns:
-                df_json[col] = ""
+            if col not in df_json.columns: df_json[col] = ""
 
-        # Limpeza e conversão
         df_json['m_movel'] = pd.to_numeric(df_json['m_movel'], errors='coerce').fillna(0).astype(int)
         df_json['m_fixa'] = pd.to_numeric(df_json['m_fixa'], errors='coerce').fillna(0).astype(int)
         df_json['cnpj'] = df_json['cnpj'].apply(limpa_id)
         df_json['cd_pessoa'] = df_json['cd_pessoa'].apply(limpa_id)
-        
-        # Limpar espaços em branco nos nomes dos consultores para o filtro não falhar
         df_json['consultor'] = df_json['consultor'].str.strip()
 
         dados = df_json[colunas_final].fillna("").to_dict(orient='records')
-        
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(dados, f, ensure_ascii=False, indent=4)
             
@@ -132,18 +167,14 @@ def upload():
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# ROTA PARA ENVIAR A LISTA DE CONSULTORES PARA O FILTRO DO FRONTEND
 @app.route('/api/filtros')
 def get_filtros():
     try:
-        if not os.path.exists(JSON_PATH):
-            return jsonify({"consultores": []})
+        if not os.path.exists(JSON_PATH): return jsonify({"consultor": []})
         with open(JSON_PATH, 'r', encoding='utf-8') as f:
             dados = json.load(f)
-        
-        # Extrai nomes únicos de consultores, remove vazios e ordena
-        consultores = sorted(list(set(d['consultor'] for d in dados if d['consultor'])))
-        return jsonify({"consultores": consultores})
+        consultor = sorted(list(set(d['consultor'] for d in dados if d['consultor'])))
+        return jsonify({"consultor": consultor})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 

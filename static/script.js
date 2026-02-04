@@ -285,8 +285,8 @@ async function popularFiltroConsultores() {
         const data = await response.json();
         
         select.innerHTML = '<option value="">Todos os Consultores</option>';
-        if (data.consultores) {
-            data.consultores.forEach(con => {
+        if (data.consultor) {
+            data.consultor.forEach(con => {
                 const opt = document.createElement('option');
                 opt.value = con;
                 opt.textContent = con;
