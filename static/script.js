@@ -8,7 +8,7 @@ let currentUser = sessionStorage.getItem('usuario');
 // --- CONTROLE DOS GRÁFICOS ---
 let instanciaGraficos = { movel: null, fixa: null };
 
-const ADMIN_USERS = ['renata', 'franciele', 'admin', 'davi'];
+const ADMIN_USERS = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo',];
 
 function hasFullAccess(username) {
     return ADMIN_USERS.includes(username?.toLowerCase());
