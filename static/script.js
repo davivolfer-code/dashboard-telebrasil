@@ -124,14 +124,17 @@ function popularFiltroConsultoresDinamico() {
     const select = document.getElementById('consultor-filter');
     if (!select) return;
 
-    // Pega todos os valores da coluna consultor, remove vazios e nomes duplicados
+    // 1. Extrai nomes únicos da coluna consultor (que mapeamos da coluna CV do Excel)
+    // Filtramos para ignorar nomes vazios, zeros ou traços
     const consultoresUnicos = [...new Set(clientesData
         .map(c => c.consultor)
-        .filter(nome => nome !== "" && nome !== "0" && nome !== "-")
-    )].sort(); // Ordena de A-Z
+        .filter(nome => nome && nome !== "" && nome !== "0" && nome !== "-")
+    )].sort();
 
-    select.innerHTML = '<option value="">Consultor Responsável (Todos)</option>';
+    // 2. Limpa o select e adiciona a opção padrão
+    select.innerHTML = '<option value="">Todos os Consultores</option>';
     
+    // 3. Adiciona cada consultor encontrado na planilha como uma opção
     consultoresUnicos.forEach(con => {
         const opt = document.createElement('option');
         opt.value = con;
