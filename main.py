@@ -76,46 +76,44 @@ def dashboard():
 # --- ALTERAÇÃO 2: ROTA DE CHAT COM FALLBACK ---
 @app.route('/chat', methods=['POST'])
 def chat():
-    if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    if 'usuario' not in session: 
+        return jsonify({"erro": "Não autorizado"}), 401
     
     try:
         dados_requisicao = request.json
         pergunta_usuario = dados_requisicao.get('message', '')
-
-        if not pergunta_usuario:
-            return jsonify({"response": "Por favor, digite uma pergunta."})
-        
         contexto_estrategico = carregar_contexto_arquivos()
         
-        dados_clientes = "Nenhum dado de cliente disponível."
         if os.path.exists(JSON_PATH):
             with open(JSON_PATH, 'r', encoding='utf-8') as f:
-                dados_clientes = f.read()[:7000] 
+                dados_clientes = f.read()[:7000]
+        else:
+            dados_clientes = "Sem dados."
 
-        # Tentamos o modelo Flash sem o prefixo "models/". 
-        # Se o erro 404 persistir, o problema é na permissão da sua Chave API.
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Lista de tentativas de modelos (do mais novo ao mais compatível)
+        modelos_para_testar = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
         
-        prompt_sistema = f"""
-        Você é o Vivonauta Pulse, assistente da Vivo Empresas.
-        CONTEXTO COMERCIAL: {contexto_estrategico}
-        DADOS CLIENTES: {dados_clientes}
-        Responda de forma curta e profissional.
-        """
+        response = None
+        erro_final = ""
 
-        # Usando apenas uma string simples para o conteúdo para máxima compatibilidade
-        response = model.generate_content(f"{prompt_sistema}\n\nPergunta: {pergunta_usuario}")
-        
+        for nome_modelo in modelos_para_testar:
+            try:
+                model = genai.GenerativeModel(nome_modelo)
+                response = model.generate_content(
+                    f"Atue como Vivonauta Pulse. Contexto: {contexto_estrategico}\nDados: {dados_clientes}\nPergunta: {pergunta_usuario}"
+                )
+                if response: break # Se funcionou, para o loop
+            except Exception as e:
+                erro_final = str(e)
+                continue # Tenta o próximo modelo da lista
+
         if response and response.text:
             return jsonify({"response": response.text})
         else:
-            return jsonify({"response": "IA sem resposta. Verifique os logs."})
+            return jsonify({"response": f"Não consegui conectar com os modelos do Google. Erro: {erro_final}"})
 
     except Exception as e:
-        print(f"ERRO CRÍTICO: {str(e)}")
-        # Se der erro 404 aqui, tente trocar 'gemini-1.5-flash' por 'gemini-pro' no código acima
-        return jsonify({"erro": f"Erro na conexão com o Google: {str(e)}"}), 500
-
+        return jsonify({"erro": str(e)}), 500
 # --- O RESTANTE DO CÓDIGO (UPLOAD E FILTROS) PERMANECE IGUAL ---
 @app.route('/upload', methods=['POST'])
 def upload():
