@@ -332,3 +332,73 @@ function formatarCNPJ(cnpj) {
     let s = cnpj.toString().replace(/\D/g, '').padStart(14, '0');
     return s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
 }
+// ================== FUNÇÕES DO CHAT IA (VIVONAUTA) ==================
+
+function toggleChat() {
+    const chatBox = document.getElementById('chat-box');
+    if (chatBox) {
+        chatBox.style.display = (chatBox.style.display === 'none' || chatBox.style.display === '') ? 'flex' : 'none';
+    }
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input-field');
+    const message = input.value.trim();
+    
+    if (!message) return;
+
+    // 1. Adiciona a mensagem do usuário na tela
+    appendMsg(message, 'user');
+    input.value = '';
+
+    // 2. Cria um ID temporário para o balão de "carregando"
+    const tempId = 'loading-' + Date.now();
+    appendMsg("Analisando base de dados...", 'ai', tempId);
+
+    try {
+        const response = await fetch('/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: message })
+        });
+        
+        const data = await response.json();
+        
+        // 3. Remove o balão de "carregando"
+        const loadingMsg = document.getElementById(tempId);
+        if (loadingMsg) loadingMsg.remove();
+
+        // 4. TRATAMENTO DO ERRO/UNDEFINED
+        // Se o Python retornar 'response', usamos ele. Se retornar 'erro', avisamos.
+        if (data.response) {
+            appendMsg(data.response, 'ai');
+        } else if (data.erro) {
+            appendMsg("⚠️ Erro na IA: " + data.erro, 'ai');
+        } else {
+            appendMsg("Ops, recebi um formato de resposta estranho.", 'ai');
+        }
+
+    } catch (error) {
+        const loadingMsg = document.getElementById(tempId);
+        if (loadingMsg) loadingMsg.remove();
+        appendMsg("Erro de conexão. Verifique se o servidor está ativo.", 'ai');
+        console.error("Erro no Chat:", error);
+    }
+}
+
+function appendMsg(text, side, id = null) {
+    const logs = document.getElementById('chat-logs');
+    if (!logs) return;
+    
+    const div = document.createElement('div');
+    div.className = `chat-msg ${side}`;
+    if (id) div.id = id;
+    
+    // Usamos innerText para segurança, ou simplificamos para converter Markdown básico se quiser
+    div.innerText = text;
+    
+    logs.appendChild(div);
+    
+    // Scroll automático para a última mensagem
+    logs.scrollTop = logs.scrollHeight;
+}
