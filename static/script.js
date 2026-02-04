@@ -96,51 +96,79 @@ async function carregarDados() {
 
         clientesData = dadosBrutos.map(c => {
             const idPessoa = c.cd_pessoa || c.CD_PESSOA || "";
+            // A coluna CV do Excel geralmente é mapeada como 'consultor' ou 'CV' no JSON
+            const nomeConsultor = String(c.consultor || c.CV || '').trim(); 
+            
             return {
                 ...c,
                 nome: String(c.nome || '').trim(),
+                consultor: nomeConsultor, // Salva o consultor da coluna CV
                 situacao: String(c.situacao || '').toUpperCase(),
-                data_fim_vtech: String(c.data_fim_vtech || '').trim(),
-                vivo_tech: String(c.vivo_tech || '').trim(),
-                term_metalico: parseInt(c.term_metalico) || 0,
-                disponibilidade: String(c.disponibilidade || '').trim(),
-                ddr: String(c.ddr || '').toUpperCase().trim(),
-                vox_digital: String(c.vox_digital || '').toUpperCase().trim(),
-                zero800: String(c.zero800 || '').toUpperCase().trim(),
-                sip_voz: String(c.sip_voz || '').toUpperCase().trim(),
-                cd_pessoa: String(idPessoa).trim(),
-                recomendacao: String(c.recomendacao || '').trim(),
+                // ... (mantenha os outros mapeamentos iguais)
                 m_movel: parseInt(c.m_movel) || 0,
-                m_fixa: parseInt(c.m_fixa) || 0
+                m_fixa: parseInt(c.m_fixa) || 0,
+                checked: c.checked || false
             };
         });
 
-        popularFiltroConsultores();
+        // Agora populamos o dropdown com base no que realmente existe na coluna CV
+        popularFiltroConsultoresDinamico();
         aplicarFiltros();
     } catch (error) {
         console.error("Erro ao processar JSON:", error);
     }
 }
 
+// NOVA FUNÇÃO: Extrai os consultores reais da base carregada
+function popularFiltroConsultoresDinamico() {
+    const select = document.getElementById('consultor-filter');
+    if (!select) return;
+
+    // Pega todos os valores da coluna consultor, remove vazios e nomes duplicados
+    const consultoresUnicos = [...new Set(clientesData
+        .map(c => c.consultor)
+        .filter(nome => nome !== "" && nome !== "0" && nome !== "-")
+    )].sort(); // Ordena de A-Z
+
+    select.innerHTML = '<option value="">Consultor Responsável (Todos)</option>';
+    
+    consultoresUnicos.forEach(con => {
+        const opt = document.createElement('option');
+        opt.value = con;
+        opt.textContent = con;
+        select.appendChild(opt);
+    });
+}
+
 function aplicarFiltros() {
     let res = clientesData;
+    
+    // Filtro de Categorias (Botões)
     if (currentFilter !== 'todos') {
         const f = filtros.find(x => x.id === currentFilter);
         if (f) res = res.filter(f.filtro);
     }
+
+    // FILTRO DE CONSULTOR (Coluna CV)
     if (selectedConsultor) {
-        res = res.filter(c => c.consultor?.toLowerCase() === selectedConsultor.toLowerCase());
+        res = res.filter(c => c.consultor === selectedConsultor);
     }
+
+    // Filtro de Busca
     if (searchTerm) {
-        res = res.filter(c => c.nome?.toLowerCase().includes(searchTerm) || c.cnpj?.toString().includes(searchTerm));
+        res = res.filter(c => 
+            c.nome?.toLowerCase().includes(searchTerm) || 
+            c.cnpj?.toString().includes(searchTerm)
+        );
     }
     
     filteredData = res;
     renderizarClientes();
     atualizarContadores(res);
-    atualizarGraficos(res); // Ativa os gráficos a cada filtro aplicado
+    atualizarGraficos(res);
 }
 
+// ================== FUNÇÕES DE RENDERIZAÇÃO ==================
 function renderizarClientes() {
     const container = document.getElementById('clients-container');
     if (!container) return;
