@@ -77,13 +77,12 @@
             <input type="text" id="search-input" placeholder="Buscar por Nome, CNPJ ou Cidade..." class="search-input">
           </div>
         </div>
-<div class="filter-group">
-  <label for="consultor-filter">Consultor Responsável:</label>
-  <select name="consultor" id="consultor-filter">
-    <option value="">Todos os Consultores</option>
-  </select>
-</div>
-
+        <div class="filter-group">
+          <label for="consultor-filter">Consultor Responsável:</label>
+          <select name="consultor" id="consultor-filter">
+            <option value="">Todos os Consultores</option>
+          </select>
+        </div>
         <div style="display: flex; gap: 10px;">
           <button id="export-btn" class="export-btn" title="Exportar para iHelp">
             <i class="fa-solid fa-file-excel"></i> iHelp
@@ -136,11 +135,12 @@
   </div>
 
   <script>
+    // Define o usuário para o script.js usar
     sessionStorage.setItem('usuario', "{{ usuario }}");
 
     function logout() { window.location.href = "{{ url_for('logout') }}"; }
 
-    // Feedback visual do nome do arquivo
+    // Feedback visual do nome do arquivo no Upload
     document.getElementById('file-input')?.addEventListener('change', function (e) {
       const fileName = e.target.files[0]?.name;
       if (fileName) {
@@ -148,7 +148,7 @@
       }
     });
 
-    // Envio do formulário de Upload
+    // Envio do formulário de Upload via AJAX
     document.getElementById('uploadForm')?.addEventListener('submit', async function (e) {
       e.preventDefault();
       const formData = new FormData(this);
@@ -169,68 +169,15 @@
         if (loading) loading.style.display = 'none';
       }
     });
-    function toggleChat() {
-      const chatBox = document.getElementById('chat-box');
-      chatBox.style.display = chatBox.style.display === 'none' ? 'flex' : 'none';
-    }
-
-    function handleKeyPress(e) {
-      if (e.key === 'Enter') sendChatMessage();
-    }
-
-    async function sendChatMessage() {
-      const input = document.getElementById('chat-input-field');
-      const message = input.value.trim();
-      if (!message) return;
-
-      appendMessage(message, 'user');
-      input.value = '';
-
-      try {
-        const response = await fetch('/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: message })
-        });
-        const data = await response.json();
-        appendMessage(data.response, 'ai');
-      } catch (error) {
-        appendMessage("Erro ao conectar com a IA.", 'ai');
-      }
-    }
-
-    function appendMessage(text, side) {
-      const logs = document.getElementById('chat-logs');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = `chat-msg ${side}`;
-      msgDiv.innerText = text;
-      logs.appendChild(msgDiv);
-      logs.scrollTop = logs.scrollHeight;
-    }
   </script>
 
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 
-  <div id="chat-circle" onclick="toggleChat()">
-    <div id="chat-overlay"></div>
-    <span class="chat-icon">🤖</span>
-  </div>
-
-  <div class="chat-box" id="chat-box" style="display: none;">
-    <div class="chat-box-header">
-      Vivonauta Pulse
-      <span class="chat-box-toggle" onclick="toggleChat()">×</span>
-    </div>
-    <div class="chat-box-body">
-      <div class="chat-logs" id="chat-logs">
-        <div class="chat-msg ai">Olá! Sou o Vivonauta. Como posso ajudar hoje?</div>
-      </div>
-    </div>
-    <div class="chat-input">
-      <input type="text" id="chat-input-field" placeholder="Faça uma pergunta..."
-        onkeypress="handleKeyPress(event)" />
-      <button onclick="sendChatMessage()" id="chat-submit">Enviar</button>
-    </div>
+  <div id="vivonauta-icon"
+    onclick="window.open('https://chatgpt.com/g/g-68440fa7dd508191944f80585a17ce3b-vivonauta-pulse', '_blank')"
+    style="position: fixed; bottom: 30px; right: 30px; cursor: pointer; z-index: 9999; transition: transform 0.3s;">
+    <img src="https://i.ibb.co/6R5Q2cbc/images.jpg" alt="Vivonauta"
+      style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 8px 20px rgba(102, 0, 153, 0.4); border: 3px solid #660099;">
   </div>
 </body>
 
