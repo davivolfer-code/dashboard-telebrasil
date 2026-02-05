@@ -90,38 +90,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function carregarDados() {
     try {
-        const response = await fetch('/dados/clientes.json');
+        // Adicionamos um parâmetro para evitar que o navegador use o arquivo antigo em cache
+        const response = await fetch('/dados/clientes.json?nocache=' + new Date().getTime());
         if (!response.ok) throw new Error("Erro ao carregar arquivo");
         const dadosBrutos = await response.json();
 
         clientesData = dadosBrutos.map(c => {
-            const idPessoa = c.cd_pessoa || c.CD_PESSOA || "";
-            // Mapeia a coluna CV do Excel
-            const nomeConsultor = String(c.consultor || c.CV || '').trim();
+            // Tenta pegar de 'consultor' (mapeado pelo python) ou 'CONSULTOR' (original do excel)
+            const nomeConsultor = String(c.consultor || c.CONSULTOR || c.CV || '').trim();
 
             return {
                 ...c,
-                nome: String(c.nome || '').trim(),
+                nome: String(c.nome || c.NM_CLIENTE || '').trim(),
                 consultor: nomeConsultor,
-                situacao: String(c.situacao || '').toUpperCase(),
-                m_movel: parseInt(c.m_movel) || 0,
-                m_fixa: parseInt(c.m_fixa) || 0,
-                checked: c.checked || false,
-                // Mantendo compatibilidade com os filtros existentes
-                data_fim_vtech: String(c.data_fim_vtech || '').trim(),
-                vivo_tech: String(c.vivo_tech || '').trim(),
-                term_metalico: parseInt(c.term_metalico) || 0,
-                disponibilidade: String(c.disponibilidade || '').trim(),
-                ddr: String(c.ddr || '').toUpperCase().trim(),
-                vox_digital: String(c.vox_digital || '').toUpperCase().trim(),
-                zero800: String(c.zero800 || '').toUpperCase().trim(),
-                sip_voz: String(c.sip_voz || '').toUpperCase().trim(),
-                cd_pessoa: String(idPessoa).trim(),
-                recomendacao: String(c.recomendacao || '').trim()
+                cnpj: String(c.cnpj || c.NR_CNPJ || '').trim(),
+                cidade: String(c.cidade || c.DS_CIDADE || '').trim(),
+                situacao: String(c.situacao || c.SITUACAO_RECEITA || '').toUpperCase(),
+                m_movel: parseInt(c.m_movel || c.QT_MOVEL_TERM) || 0,
+                m_fixa: parseInt(c.m_fixa || c.QT_BASICA_TERM_FIBRA) || 0,
+                checked: c.checked || false
             };
         });
 
-        // Preenche o dropdown usando os dados que acabaram de ser carregados
+        console.log("Consultores encontrados:", [...new Set(clientesData.map(c => c.consultor))]);
         popularFiltroConsultores();
         aplicarFiltros();
     } catch (error) {

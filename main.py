@@ -142,7 +142,7 @@ def upload():
             'RECOMENDACAO': 'recomendacao', 
             'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
             'CONSULTORES': 'consultor', 
-            'CV': 'consultor',  
+            'CONSULTOR': 'consultor',  
             'VENCIMENTO': 'vencimento',
             'DATA_FIM_VTECH': 'data_fim_vtech', 
             'VIVO_TECH': 'vivo_tech',
