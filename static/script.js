@@ -397,38 +397,31 @@
     }
 
 function baixarDadosFiltrados() {
-    console.log("Iniciando download...", filteredData.length); // Para teste no console (F12)
-    
     if (!filteredData || filteredData.length === 0) {
-        alert("Não há dados na tela para exportar. Aplique um filtro primeiro.");
+        alert("Não há dados na tela para exportar.");
         return;
     }
 
-    const colunas = ["CNPJ", "Nome", "Cidade", "Consultor", "Movel", "Fixa", "Situacao", "STATUS_VISTO"];
-    
-    const corpo = filteredData.map(c => {
-        const statusVisto = c.checked ? "CONTATADO" : "PENDENTE";
-        return [
-            `"${c.cnpj}"`, 
-            `"${c.nome}"`,
-            `"${c.cidade}"`,
-            `"${c.consultor}"`,
-            c.m_movel,
-            c.m_fixa,
-            `"${c.situacao}"`,
-            `"${statusVisto}"`
-        ].join(";");
-    });
+    // 1. Prepara os dados (Array de Objetos)
+    const dadosParaExportar = filteredData.map(c => ({
+        "CNPJ": c.cnpj,
+        "Nome": c.nome,
+        "Cidade": c.cidade,
+        "Consultor (CV)": c.consultor,
+        "Qtd Móvel": c.m_movel,
+        "Qtd Fixa": c.m_fixa,
+        "Situação": c.situacao,
+        "Status": c.checked ? "CONTATADO" : "PENDENTE"
+    }));
 
-    const csvFinal = "\uFEFF" + colunas.join(";") + "\n" + corpo.join("\n");
-    const blob = new Blob([csvFinal], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    
-    link.href = url;
-    link.download = `iHelp_Telebrasil_${currentFilter}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url); // Limpa a memória
+    // 2. Cria uma nova planilha (Worksheet)
+    const worksheet = XLSX.utils.json_to_sheet(dadosParaExportar);
+
+    // 3. Cria um novo livro (Workbook)
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Clientes Filtrados");
+
+    // 4. Salva o arquivo como .xlsx
+    const dataHora = new Date().toLocaleDateString().replace(/\//g, '-');
+    XLSX.writeFile(workbook, `iHelp_Telebrasil_${currentFilter}_${dataHora}.xlsx`);
 }
