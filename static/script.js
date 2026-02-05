@@ -417,3 +417,42 @@ function formatarCNPJ(cnpj) {
     let s = cnpj.toString().replace(/\D/g, '').padStart(14, '0');
     return s.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
 }
+
+function baixarFiltrados() {
+    if (filteredData.length === 0) {
+        alert("Não há dados filtrados para exportar.");
+        return;
+    }
+
+    // 1. Define o cabeçalho do arquivo (ajuste conforme as colunas do seu Excel)
+    const cabecalho = ["CNPJ", "Nome", "Cidade", "Consultor", "Movel", "Fixa", "Situacao"];
+    
+    // 2. Transforma os dados em linhas de texto
+    const linhas = filteredData.map(c => [
+        `"${c.cnpj}"`, // Aspas para o Excel não comer os zeros à esquerda
+        `"${c.nome}"`,
+        `"${c.cidade}"`,
+        `"${c.consultor}"`,
+        c.m_movel,
+        c.m_fixa,
+        `"${c.situacao}"`
+    ].join(","));
+
+    // 3. Junta tudo (Cabeçalho + Conteúdo)
+    const csvContent = "\uFEFF" + [cabecalho.join(","), ...linhas].join("\n");
+
+    // 4. Cria o arquivo para download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    
+    // Define o nome do arquivo com base no filtro atual
+    const nomeArquivo = `clientes_filtrados_${currentFilter}.csv`;
+    
+    link.setAttribute("href", url);
+    link.setAttribute("download", nomeArquivo);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
