@@ -14,8 +14,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
-# --- ALTERAÇÃO 1: CONFIGURAÇÃO SIMPLIFICADA ---
-# Remova qualquer menção a versões beta ou configurações complexas aqui
+# --- CONFIGURAÇÃO GEMINI ---
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -26,6 +25,7 @@ JSON_PATH = os.path.join(DADOS_FOLDER, 'clientes.json')
 os.makedirs(DADOS_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# --- CARREGAR UTILIZADORES ---
 usuarios = {}
 for key, value in os.environ.items():
     if key.startswith("USER_"):
@@ -50,6 +50,7 @@ def carregar_contexto_arquivos():
                 continue
     return conteudo
 
+# --- ROTAS DE NAVEGAÇÃO ---
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -73,7 +74,12 @@ def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
     return render_template('dashboard.html', usuario=session['usuario'])
 
-# --- ALTERAÇÃO 2: ROTA DE CHAT COM FALLBACK ---
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+# --- ROTA DE CHAT ---
 @app.route('/chat', methods=['POST'])
 def chat():
     if 'usuario' not in session: 
@@ -90,9 +96,7 @@ def chat():
         else:
             dados_clientes = "Sem dados."
 
-        # Lista de tentativas de modelos (do mais novo ao mais compatível)
         modelos_para_testar = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
-        
         response = None
         erro_final = ""
 
@@ -102,19 +106,20 @@ def chat():
                 response = model.generate_content(
                     f"Atue como Vivonauta Pulse. Contexto: {contexto_estrategico}\nDados: {dados_clientes}\nPergunta: {pergunta_usuario}"
                 )
-                if response: break # Se funcionou, para o loop
+                if response: break 
             except Exception as e:
                 erro_final = str(e)
-                continue # Tenta o próximo modelo da lista
+                continue 
 
         if response and response.text:
             return jsonify({"response": response.text})
         else:
-            return jsonify({"response": f"Não consegui conectar com os modelos do Google. Erro: {erro_final}"})
+            return jsonify({"response": f"Erro na conexão Gemini: {erro_final}"})
 
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-# --- O RESTANTE DO CÓDIGO (UPLOAD E FILTROS) PERMANECE IGUAL ---
+
+# --- ROTA DE UPLOAD ---
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -134,30 +139,14 @@ def upload():
         df.columns = [str(c).strip().upper() for c in df.columns]
 
         mapeamento = {
-            'NM_CLIENTE': 'nome', 
-            'NR_CNPJ': 'cnpj', 
-            'DS_ID_CIDADE': 'cidade',
-            'DS_CIDADE': 'cidade', 
-            'SITUACAO_RECEITA': 'situacao', 
-            'RECOMENDACAO': 'recomendacao', 
-            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone',
-            'CONSULTORES': 'consultor', 
-            'CONSULTOR': 'consultor',  
-            'VENCIMENTO': 'vencimento',
-            'DATA_FIM_VTECH': 'data_fim_vtech', 
-            'VIVO_TECH': 'vivo_tech',
-            'QT_MOVEL_TERM': 'm_movel',     
-            'QT_BASICA_TERM_FIBRA': 'm_fixa',   
-            'TP_PRODUTO': 'tp_produto',
-            'QT_BASICA_TERM_METALICO': 'term_metalico', 
-            'DS_DISPONIBILIDADE': 'disponibilidade',
-            'DDR': 'ddr', 
-            '0800': 'zero800', 
-            'SIP_VOZ': 'sip_voz',
-            'VOX_DIGITAL': 'vox_digital', 
-            'CD_PESSOA': 'cd_pessoa'
+            'NM_CLIENTE': 'nome', 'NR_CNPJ': 'cnpj', 'DS_ID_CIDADE': 'cidade', 'DS_CIDADE': 'cidade', 
+            'SITUACAO_RECEITA': 'situacao', 'RECOMENDACAO': 'recomendacao', 
+            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone', 'CONSULTOR': 'consultor', 'CONSULTORES': 'consultor',
+            'VENCIMENTO': 'vencimento', 'DATA_FIM_VTECH': 'data_fim_vtech', 'VIVO_TECH': 'vivo_tech',
+            'QT_MOVEL_TERM': 'm_movel', 'QT_BASICA_TERM_FIBRA': 'm_fixa', 'TP_PRODUTO': 'tp_produto',
+            'QT_BASICA_TERM_METALICO': 'term_metalico', 'DS_DISPONIBILIDADE': 'disponibilidade',
+            'DDR': 'ddr', '0800': 'zero800', 'SIP_VOZ': 'sip_voz', 'VOX_DIGITAL': 'vox_digital', 'CD_PESSOA': 'cd_pessoa'
         }
-
         
         df_json = df.rename(columns=mapeamento)
         colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 'telefone', 'm_movel', 'm_fixa', 'tp_produto', 'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
@@ -178,7 +167,8 @@ def upload():
         return jsonify({"mensagem": "Upload concluído!", "status": "ok"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-        
+
+# --- ROTAS DE DADOS E FILTROS ---
 @app.route('/api/filtros')
 def get_filtros():
     try:
@@ -194,67 +184,56 @@ def get_filtros():
 def dados_clientes():
     return send_from_directory(DADOS_FOLDER, 'clientes.json')
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
+# --- ROTAS DE INTERAÇÃO (API) ---
 
 @app.route('/api/check_cliente', methods=['POST'])
 def check_cliente():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
-    
     dados_req = request.json
     cnpj_alvo = str(dados_req.get('cnpj'))
-    status_check = dados_req.get('checked') # True ou False
+    status_check = dados_req.get('checked')
 
-    if not os.path.exists(JSON_PATH):
-        return jsonify({"erro": "Arquivo não encontrado"}), 404
+    try:
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            clientes = json.load(f)
+        for c in clientes:
+            if str(c.get('cnpj')) == cnpj_alvo:
+                c['checked'] = status_check
+                break
+        with open(JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(clientes, f, ensure_ascii=False, indent=4)
+        return jsonify({"status": "ok"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+@app.route('/api/salvar_detalhes', methods=['POST'])
+def salvar_detalhes():
+    if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
+    dados_req = request.json
+    cnpj_alvo = str(dados_req.get('cnpj'))
 
     try:
         with open(JSON_PATH, 'r', encoding='utf-8') as f:
             clientes = json.load(f)
 
-        # Atualiza o cliente específico
-        for cliente in clientes:
-            if str(cliente.get('cnpj')) == cnpj_alvo:
-                cliente['checked'] = status_check
+        for c in clientes:
+            if str(c.get('cnpj')) == cnpj_alvo:
+                # Salva observação e a data obrigatória
+                if 'observacao' in dados_req:
+                    c['observacao'] = dados_req['observacao']
+                    c['data_obs'] = dados_req['data_obs']
+                # Salva status do funil (ganho/perdido)
+                if 'status_funil' in dados_req:
+                    c['status_funil'] = dados_req['status_funil']
                 break
 
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
             json.dump(clientes, f, ensure_ascii=False, indent=4)
-
-        return jsonify({"status": "ok", "message": "Status atualizado"})
+        return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-@app.route('/api/salvar_obs', methods=['POST'])
-def salvar_obs():
-    if 'usuario' not in session: 
-        return jsonify({"erro": "Não autorizado"}), 401
-    
-    dados_req = request.json
-    cnpj_alvo = str(dados_req.get('cnpj'))
-    texto_obs = dados_req.get('observacao', '')
 
-    if not os.path.exists(JSON_PATH):
-        return jsonify({"erro": "Ficheiro não encontrado"}), 404
-
-    try:
-        with open(JSON_PATH, 'r', encoding='utf-8') as f:
-            clientes = json.load(f)
-
-        # Procura o cliente e atualiza a observação
-        for cliente in clientes:
-            if str(cliente.get('cnpj')) == cnpj_alvo:
-                cliente['observacao'] = texto_obs
-                break
-
-        with open(JSON_PATH, 'w', encoding='utf-8') as f:
-            json.dump(clientes, f, ensure_ascii=False, indent=4)
-
-        return jsonify({"status": "ok", "message": "Observação guardada"})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-    
+# --- INICIALIZAÇÃO ---
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)

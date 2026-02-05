@@ -192,6 +192,7 @@ function renderizarClientes() {
 
         const corMovel = cliente.m_movel >= 17 ? '#10b981' : '#64748b';
         const corFixa = cliente.m_fixa >= 7 ? '#10b981' : '#64748b';
+        const statusFunil = cliente.status_funil || 'aberto'; // aberto, ganho, perdido
 
         // --- Bloco EXTRA (Mantido) ---
         let htmlCodigoExtra = '';
@@ -245,6 +246,29 @@ function renderizarClientes() {
         style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: #fff;"
     >${cliente.observacao || ''}</textarea>
 </div>
+<div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <label style="font-size: 0.65rem; font-weight: bold; color: #64748b; display: block;">NOTAS E STATUS:</label>
+            <div style="display: flex; gap: 4px;">
+                <button onclick="atualizarFunil('${cliente.cnpj}', 'ganho')" 
+                    style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; font-weight: bold;">🏆 GANHO</button>
+                <button onclick="atualizarFunil('${cliente.cnpj}', 'perdido')" 
+                    style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; font-weight: bold;">❌ PERDIDO</button>
+            </div>
+        </div>
+        
+        <textarea 
+            class="obs-input" 
+            placeholder="Escreva uma observação..." 
+            onchange="salvarNotaCompleta('${cliente.cnpj}', this.value)"
+            style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: #fff;"
+        >${cliente.observacao || ''}</textarea>
+        
+        <div style="font-size: 0.6rem; color: #94a3b8; margin-top: 2px; text-align: right;">
+            📅 ${cliente.data_obs || 'Sem registro'}
+        </div>
+    </div>
+
 
                 ${htmlCodigoExtra} 
                 ${htmlServicos}
@@ -286,7 +310,7 @@ async function salvarObservacao(cnpj, texto) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ cnpj: cnpj, observacao: texto })
         });
-        
+
         if (response.ok) {
             // Atualiza localmente para não precisar recarregar
             const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
@@ -437,8 +461,7 @@ function baixarDadosFiltrados() {
         return;
     }
 
-    // Prepara os dados formatados para o Excel
-    const exportData = filteredData.map(c => ({
+const exportData = filteredData.map(c => ({
         "CNPJ": c.cnpj,
         "Cliente": c.nome,
         "Cidade": c.cidade,
@@ -446,8 +469,10 @@ function baixarDadosFiltrados() {
         "Móvel": c.m_movel,
         "Fixa": c.m_fixa,
         "Situação": c.situacao,
-        "Status": c.checked ? "CONTATADO" : "PENDENTE",
-        "OBSERVAÇÕES": c.observacao || ""
+        "Visto": c.checked ? "SIM" : "NÃO",
+        "STATUS NEGÓCIO": (c.status_funil || "EM ABERTO").toUpperCase(),
+        "OBSERVAÇÃO": c.observacao || "",
+        "DATA DA NOTA": c.data_obs || "" 
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -456,4 +481,48 @@ function baixarDadosFiltrados() {
 
     // Gera o download do arquivo .xlsx real
     XLSX.writeFile(workbook, `Relatorio_Telebrasil_${currentFilter}.xlsx`);
+}
+// Função que salva o texto e gera a data automática
+async function salvarNotaCompleta(cnpj, texto) {
+    const dataAtual = new Date().toLocaleString('pt-BR');
+    try {
+        const response = await fetch('/api/salvar_detalhes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                cnpj: cnpj, 
+                observacao: texto, 
+                data_obs: dataAtual 
+            })
+        });
+        
+        if (response.ok) {
+            const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
+            if (cliente) {
+                cliente.observacao = texto;
+                cliente.data_obs = dataAtual;
+                // Re-renderiza para mostrar a data nova sem dar refresh
+                renderizarClientes();
+            }
+        }
+    } catch (error) { console.error("Erro ao salvar nota:", error); }
+}
+
+// Função que salva o status de Ganho ou Perdido
+async function atualizarFunil(cnpj, status) {
+    try {
+        const response = await fetch('/api/salvar_detalhes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cnpj: cnpj, status_funil: status })
+        });
+        
+        if (response.ok) {
+            const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
+            if (cliente) {
+                cliente.status_funil = status;
+                aplicarFiltros(); // Atualiza a tela e as cores dos botões
+            }
+        }
+    } catch (error) { console.error("Erro ao atualizar funil:", error); }
 }
