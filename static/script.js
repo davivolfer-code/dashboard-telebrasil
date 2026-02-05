@@ -90,14 +90,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function carregarDados() {
     try {
-        // Adicionamos um parâmetro para evitar que o navegador use o arquivo antigo em cache
         const response = await fetch('/dados/clientes.json?nocache=' + new Date().getTime());
         if (!response.ok) throw new Error("Erro ao carregar arquivo");
         const dadosBrutos = await response.json();
 
         clientesData = dadosBrutos.map(c => {
-            // Tenta pegar de 'consultor' (mapeado pelo python) ou 'CONSULTOR' (original do excel)
-            const nomeConsultor = String(c.consultor || c.CONSULTOR || c.CV || '').trim();
+            // Prioridade total para o que vem do mapa (CONSULTOR)
+            const nomeConsultor = String(c.consultor || c.CONSULTOR || c.CV || 'NÃO INFORMADO').trim();
 
             return {
                 ...c,
@@ -108,11 +107,22 @@ async function carregarDados() {
                 situacao: String(c.situacao || c.SITUACAO_RECEITA || '').toUpperCase(),
                 m_movel: parseInt(c.m_movel || c.QT_MOVEL_TERM) || 0,
                 m_fixa: parseInt(c.m_fixa || c.QT_BASICA_TERM_FIBRA) || 0,
-                checked: c.checked || false
+                checked: c.checked || false,
+                // Mantendo os outros campos
+                data_fim_vtech: String(c.data_fim_vtech || '').trim(),
+                vivo_tech: String(c.vivo_tech || '').trim(),
+                term_metalico: parseInt(c.term_metalico || 0),
+                disponibilidade: String(c.disponibilidade || '').trim(),
+                ddr: String(c.ddr || '').toUpperCase().trim(),
+                vox_digital: String(c.vox_digital || '').toUpperCase().trim(),
+                zero800: String(c.zero800 || '').toUpperCase().trim(),
+                sip_voz: String(c.sip_voz || '').toUpperCase().trim(),
+                cd_pessoa: String(c.cd_pessoa || '').trim(),
+                recomendacao: String(c.recomendacao || '').trim(),
+                telefone: String(c.telefone || c.CELULAR_CONTATO_PRINCIPAL_SFA || '')
             };
         });
 
-        console.log("Consultores encontrados:", [...new Set(clientesData.map(c => c.consultor))]);
         popularFiltroConsultores();
         aplicarFiltros();
     } catch (error) {
@@ -226,6 +236,15 @@ function renderizarClientes() {
                         <div style="font-size: 0.5rem; font-weight: bold; color: #64748b; margin-top: 2px;">VISTO</div>
                     </div>
                 </div>
+                <div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+    <label style="font-size: 0.65rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">NOTAS / OBSERVAÇÕES:</label>
+    <textarea 
+        class="obs-input" 
+        placeholder="Escreva uma observação..." 
+        onchange="salvarObservacao('${cliente.cnpj}', this.value)"
+        style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: #fff;"
+    >${cliente.observacao || ''}</textarea>
+</div>
 
                 ${htmlCodigoExtra} 
                 ${htmlServicos}
@@ -258,6 +277,25 @@ function renderizarClientes() {
             `;
         container.appendChild(card);
     });
+}
+
+async function salvarObservacao(cnpj, texto) {
+    try {
+        const response = await fetch('/api/salvar_obs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cnpj: cnpj, observacao: texto })
+        });
+        
+        if (response.ok) {
+            // Atualiza localmente para não precisar recarregar
+            const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
+            if (cliente) cliente.observacao = texto;
+            console.log("Observação salva!");
+        }
+    } catch (error) {
+        console.error("Erro ao salvar nota:", error);
+    }
 }
 
 // FUNÇÃO PARA ENVIAR O CHECK PARA O SERVIDOR
@@ -390,7 +428,7 @@ function formatarCNPJ(cnpj) {
 
 function baixarDadosFiltrados() {
     if (typeof XLSX === 'undefined') {
-        alert("Erro: Biblioteca de exportação não carregada. Verifique sua conexão.");
+        alert("Erro: Biblioteca de exportação não carregada.");
         return;
     }
 
@@ -399,7 +437,7 @@ function baixarDadosFiltrados() {
         return;
     }
 
-    // Prepara os dados formatados
+    // Prepara os dados formatados para o Excel
     const exportData = filteredData.map(c => ({
         "CNPJ": c.cnpj,
         "Cliente": c.nome,
@@ -408,13 +446,14 @@ function baixarDadosFiltrados() {
         "Móvel": c.m_movel,
         "Fixa": c.m_fixa,
         "Situação": c.situacao,
-        "Status": c.checked ? "CONTATADO" : "PENDENTE"
+        "Status": c.checked ? "CONTATADO" : "PENDENTE",
+        "OBSERVAÇÕES": c.observacao || ""
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Filtro iHelp");
 
-    // Gera o download do arquivo .xlsx
+    // Gera o download do arquivo .xlsx real
     XLSX.writeFile(workbook, `Relatorio_Telebrasil_${currentFilter}.xlsx`);
 }

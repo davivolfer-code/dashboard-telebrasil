@@ -226,7 +226,35 @@ def check_cliente():
         return jsonify({"status": "ok", "message": "Status atualizado"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
+@app.route('/api/salvar_obs', methods=['POST'])
+def salvar_obs():
+    if 'usuario' not in session: 
+        return jsonify({"erro": "Não autorizado"}), 401
+    
+    dados_req = request.json
+    cnpj_alvo = str(dados_req.get('cnpj'))
+    texto_obs = dados_req.get('observacao', '')
 
+    if not os.path.exists(JSON_PATH):
+        return jsonify({"erro": "Ficheiro não encontrado"}), 404
+
+    try:
+        with open(JSON_PATH, 'r', encoding='utf-8') as f:
+            clientes = json.load(f)
+
+        # Procura o cliente e atualiza a observação
+        for cliente in clientes:
+            if str(cliente.get('cnpj')) == cnpj_alvo:
+                cliente['observacao'] = texto_obs
+                break
+
+        with open(JSON_PATH, 'w', encoding='utf-8') as f:
+            json.dump(clientes, f, ensure_ascii=False, indent=4)
+
+        return jsonify({"status": "ok", "message": "Observação guardada"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+    
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
     app.run(host='0.0.0.0', port=port)
