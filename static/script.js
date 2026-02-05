@@ -96,44 +96,50 @@ async function carregarDados() {
 
         clientesData = dadosBrutos.map(c => {
             const idPessoa = c.cd_pessoa || c.CD_PESSOA || "";
-            // A coluna CV do Excel geralmente é mapeada como 'consultor' ou 'CV' no JSON
+            // Mapeia a coluna CV do Excel
             const nomeConsultor = String(c.consultor || c.CV || '').trim(); 
             
             return {
                 ...c,
                 nome: String(c.nome || '').trim(),
-                consultor: nomeConsultor, // Salva o consultor da coluna CV
+                consultor: nomeConsultor,
                 situacao: String(c.situacao || '').toUpperCase(),
-                // ... (mantenha os outros mapeamentos iguais)
                 m_movel: parseInt(c.m_movel) || 0,
                 m_fixa: parseInt(c.m_fixa) || 0,
-                checked: c.checked || false
+                checked: c.checked || false,
+                // Mantendo compatibilidade com os filtros existentes
+                data_fim_vtech: String(c.data_fim_vtech || '').trim(),
+                vivo_tech: String(c.vivo_tech || '').trim(),
+                term_metalico: parseInt(c.term_metalico) || 0,
+                disponibilidade: String(c.disponibilidade || '').trim(),
+                ddr: String(c.ddr || '').toUpperCase().trim(),
+                vox_digital: String(c.vox_digital || '').toUpperCase().trim(),
+                zero800: String(c.zero800 || '').toUpperCase().trim(),
+                sip_voz: String(c.sip_voz || '').toUpperCase().trim(),
+                cd_pessoa: String(idPessoa).trim(),
+                recomendacao: String(c.recomendacao || '').trim()
             };
         });
 
-        // Agora populamos o dropdown com base no que realmente existe na coluna CV
-        popularFiltroConsultoresDinamico();
+        // Preenche o dropdown usando os dados que acabaram de ser carregados
+        popularFiltroConsultores();
         aplicarFiltros();
     } catch (error) {
         console.error("Erro ao processar JSON:", error);
     }
 }
-
 function popularFiltroConsultores() {
     const select = document.getElementById('consultor-filter');
     if (!select) return;
 
-    // 1. Extrai nomes únicos da propriedade 'consultor' (que veio da coluna CV)
-    // Set() remove duplicatas automaticamente
+    // Extrai nomes únicos da coluna CV (propriedade consultor)
     const consultoresUnicos = [...new Set(clientesData
         .map(c => c.consultor)
         .filter(nome => nome && nome !== "" && nome !== "0" && nome !== "-" && nome !== "undefined")
-    )].sort(); // Coloca em ordem alfabética
+    )].sort();
 
-    // 2. Mantém a opção padrão e limpa o resto
     select.innerHTML = '<option value="">Todos os Consultores</option>';
     
-    // 3. Adiciona cada consultor como uma nova linha no menu
     consultoresUnicos.forEach(con => {
         const opt = document.createElement('option');
         opt.value = con;
