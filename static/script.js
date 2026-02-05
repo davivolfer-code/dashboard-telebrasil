@@ -397,31 +397,32 @@
     }
 
 function baixarDadosFiltrados() {
+    if (typeof XLSX === 'undefined') {
+        alert("Erro: Biblioteca de exportação não carregada. Verifique sua conexão.");
+        return;
+    }
+
     if (!filteredData || filteredData.length === 0) {
         alert("Não há dados na tela para exportar.");
         return;
     }
 
-    // 1. Prepara os dados (Array de Objetos)
-    const dadosParaExportar = filteredData.map(c => ({
+    // Prepara os dados formatados
+    const exportData = filteredData.map(c => ({
         "CNPJ": c.cnpj,
-        "Nome": c.nome,
+        "Cliente": c.nome,
         "Cidade": c.cidade,
-        "Consultor (CV)": c.consultor,
-        "Qtd Móvel": c.m_movel,
-        "Qtd Fixa": c.m_fixa,
+        "Consultor": c.consultor,
+        "Móvel": c.m_movel,
+        "Fixa": c.m_fixa,
         "Situação": c.situacao,
         "Status": c.checked ? "CONTATADO" : "PENDENTE"
     }));
 
-    // 2. Cria uma nova planilha (Worksheet)
-    const worksheet = XLSX.utils.json_to_sheet(dadosParaExportar);
-
-    // 3. Cria um novo livro (Workbook)
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Clientes Filtrados");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Filtro iHelp");
 
-    // 4. Salva o arquivo como .xlsx
-    const dataHora = new Date().toLocaleDateString().replace(/\//g, '-');
-    XLSX.writeFile(workbook, `iHelp_Telebrasil_${currentFilter}_${dataHora}.xlsx`);
+    // Gera o download do arquivo .xlsx
+    XLSX.writeFile(workbook, `Relatorio_Telebrasil_${currentFilter}.xlsx`);
 }
