@@ -6,15 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Mapa Parque | Telebrasil</title>
 
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  
 </head>
 
 <body>
@@ -43,7 +40,7 @@
         <div class="header-actions">
           <div class="user-info">
             <i class="fa-solid fa-circle-user"></i>
-            <span id="userWelcome">{{ usuario|capitalize }}</span>
+            <span id="userWelcome">{{ usuario|capitalize if usuario else 'Usuário' }}</span>
           </div>
           <button onclick="logout()" class="logout-btn">Sair</button>
         </div>
@@ -51,22 +48,10 @@
 
       <div class="stats-container">
         <div class="stats-grid">
-          <div class="stat-item">
-            <span class="stat-number" id="total-clientes">0</span>
-            <span class="stat-label">Total Clientes</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number" id="total-oportunidades">0</span>
-            <span class="stat-label">Oportunidades</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number" id="cidades-atendidas">0</span>
-            <span class="stat-label">Cidades</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-number" id="consultor">0</span>
-            <span class="stat-label">Consultores</span>
-          </div>
+          <div class="stat-item"><span class="stat-number" id="total-clientes">0</span><span class="stat-label">Total Clientes</span></div>
+          <div class="stat-item"><span class="stat-number" id="total-oportunidades">0</span><span class="stat-label">Oportunidades</span></div>
+          <div class="stat-item"><span class="stat-number" id="cidades-atendidas">0</span><span class="stat-label">Cidades</span></div>
+          <div class="stat-item"><span class="stat-number" id="consultor">0</span><span class="stat-label">Consultores</span></div>
         </div>
       </div>
     </header>
@@ -89,56 +74,43 @@
           <i class="fa-solid fa-file-excel"></i> Baixar Excel
         </button>
       </div>
-  </div>
 
-  <div style="margin-top: 25px; display: flex; justify-content: center;">
-    <form id="uploadForm" class="upload-area"
-      style="width: 100%; max-width: 600px; padding: 30px; border: 2px dashed #660099; border-radius: 15px; text-align: center; background: #fff;">
-      <h4 style="color: #660099; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i> Atualizar Base Master
-      </h4>
-      <input type="file" name="file" id="file-input" hidden required>
-      <label for="file-input" style="cursor: pointer; color: #94a3b8;">
-        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: #660099;"></i>
-        <p style="font-size: 0.9rem; margin-top: 10px;">Selecione o arquivo Excel/CSV da Planilha Master</p>
-      </label>
-      <button type="submit" class="action-btn"
-        style="max-width: 200px; margin: 20px auto 0; font-size: 0.9rem; background: #660099;">Atualizar
-        Dados</button>
-    </form>
-  </div>
+      <div style="margin-top: 25px; display: flex; justify-content: center;">
+        <form id="uploadForm" class="upload-area" style="width: 100%; max-width: 600px; padding: 30px; border: 2px dashed #660099; border-radius: 15px; text-align: center; background: #fff;">
+          <h4 style="color: #660099; margin-bottom: 10px;"><i class="fa-solid fa-file-import"></i> Atualizar Base Master</h4>
+          <input type="file" name="file" id="file-input" hidden required>
+          <label for="file-input" style="cursor: pointer; color: #94a3b8;">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.5rem; color: #660099;"></i>
+            <p style="font-size: 0.9rem; margin-top: 10px;">Selecione o arquivo Excel/CSV da Planilha Master</p>
+          </label>
+          <button type="submit" class="action-btn" style="max-width: 200px; margin: 20px auto 0; font-size: 0.9rem; background: #660099;">Atualizar Dados</button>
+        </form>
+      </div>
 
-  <section class="charts-section"
-    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin: 30px 0;">
-    <div class="card-chart"
-      style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
-      <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-chart-pie"></i> Situação da Base</h4>
-      <canvas id="chartSituacao"></canvas>
-    </div>
-    <div class="card-chart"
-      style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
-      <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-map-location-dot"></i> Top 5 Cidades
-      </h4>
-      <canvas id="chartCidades"></canvas>
-    </div>
-  </section>
+      <section class="charts-section" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin: 30px 0;">
+        <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+          <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-chart-pie"></i> Situação da Base</h4>
+          <canvas id="chartSituacao"></canvas>
+        </div>
+        <div class="card-chart" style="background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; height: 350px;">
+          <h4 style="margin-bottom: 20px; color: #660099;"><i class="fa-solid fa-map-location-dot"></i> Top 5 Cidades</h4>
+          <canvas id="chartCidades"></canvas>
+        </div>
+      </section>
 
-  <section class="filters-section">
-    <h3><i class="fa-solid fa-bolt"></i> Filtros Inteligentes</h3>
-    <div class="filters-grid" id="filters-container"></div>
-  </section>
+      <section class="filters-section">
+        <h3><i class="fa-solid fa-bolt"></i> Filtros Inteligentes</h3>
+        <div class="filters-grid" id="filters-container"></div>
+      </section>
 
-  <section class="clients-container" id="clients-container"></section>
-  </div>
-  </main>
+      <section class="clients-container" id="clients-container"></section>
+    </main>
   </div>
 
   <script>
-    // Define o usuário para o script.js usar
     sessionStorage.setItem('usuario', "{{ usuario }}");
-
     function logout() { window.location.href = "{{ url_for('logout') }}"; }
 
-    // Feedback visual do nome do arquivo no Upload
     document.getElementById('file-input')?.addEventListener('change', function (e) {
       const fileName = e.target.files[0]?.name;
       if (fileName) {
@@ -146,41 +118,31 @@
       }
     });
 
-    // Envio do formulário de Upload via AJAX
     document.getElementById('uploadForm')?.addEventListener('submit', async function (e) {
       e.preventDefault();
       const formData = new FormData(this);
       const loading = document.getElementById('loading');
       if (loading) loading.style.display = 'flex';
-
       try {
         const response = await fetch('/upload', { method: 'POST', body: formData });
         const resultado = await response.json();
-        if (response.ok) {
-          location.reload();
-        } else {
-          alert("Erro no Upload: " + resultado.erro);
-        }
-      } catch (err) {
-        alert("Erro de conexão com o servidor.");
-      } finally {
-        if (loading) loading.style.display = 'none';
-      }
+        if (response.ok) { location.reload(); } else { alert("Erro no Upload: " + resultado.erro); }
+      } catch (err) { alert("Erro de conexão com o servidor."); } finally { if (loading) loading.style.display = 'none'; }
     });
   </script>
 
-  <script>
-    const IS_ADMIN_SESSION = {{ 'true' if session.get('is_admin') else 'false' }};
-  </script>
-
+<script>
+  // Transformamos o valor em string no servidor e comparamos no cliente
+  // Isso evita que o JS quebre se o Flask enviar "True" ou "None"
+  const IS_ADMIN_SESSION = ("{{ session.get('is_admin', False) }}" === "True");
+  
+  // Para testar no console do navegador (F12), remova a linha abaixo depois
+  console.log("Usuário é Admin?", IS_ADMIN_SESSION);
+</script>
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 
-  <div id="vivonauta-icon"
-    onclick="window.open('https://chatgpt.com/g/g-68440fa7dd508191944f80585a17ce3b-vivonauta-pulse', '_blank')"
-    style="position: fixed; bottom: 30px; right: 30px; cursor: pointer; z-index: 9999; transition: transform 0.3s;">
-    <img src="https://i.ibb.co/6R5Q2cbc/images.jpg" alt="Vivonauta"
-      style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 8px 20px rgba(102, 0, 153, 0.4); border: 3px solid #660099;">
+  <div id="vivonauta-icon" onclick="window.open('https://chatgpt.com/g/g-68440fa7dd508191944f80585a17ce3b-vivonauta-pulse', '_blank')" style="position: fixed; bottom: 30px; right: 30px; cursor: pointer; z-index: 9999; transition: transform 0.3s;">
+    <img src="https://i.ibb.co/6R5Q2cbc/images.jpg" alt="Vivonauta" style="width: 70px; height: 70px; border-radius: 50%; box-shadow: 0 8px 20px rgba(102, 0, 153, 0.4); border: 3px solid #660099;">
   </div>
 </body>
-
 </html>

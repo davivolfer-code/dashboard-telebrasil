@@ -70,7 +70,7 @@ def login():
             return redirect(url_for('dashboard'))
         erro = 'Usuário ou senha incorretos'
     return render_template('login.html', erro=erro)
-
+    
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
