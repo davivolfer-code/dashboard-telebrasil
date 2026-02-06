@@ -132,13 +132,11 @@
   </script>
 
 <script>
-  // Transformamos o valor em string no servidor e comparamos no cliente
-  // Isso evita que o JS quebre se o Flask enviar "True" ou "None"
-  const IS_ADMIN_SESSION = ("{{ session.get('is_admin', False) }}" === "True");
-  
-  // Para testar no console do navegador (F12), remova a linha abaixo depois
-  console.log("Usuário é Admin?", IS_ADMIN_SESSION);
+  // window. garante que o script.js enxergue. 
+  // | tojson garante que não vire texto/string.
+  window.IS_ADMIN_SESSION = {{ session.get('is_admin', False) | tojson }};
 </script>
+
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 
   <div id="vivonauta-icon" onclick="window.open('https://chatgpt.com/g/g-68440fa7dd508191944f80585a17ce3b-vivonauta-pulse', '_blank')" style="position: fixed; bottom: 30px; right: 30px; cursor: pointer; z-index: 9999; transition: transform 0.3s;">

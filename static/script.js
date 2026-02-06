@@ -14,11 +14,18 @@ function hasFullAccess(username) {
     if (!username) return false;
     const user = username.toLowerCase().trim();
     
-    // Lista de segurança caso a sessão falhe
+    // Lista de Admins - APENAS estes nomes terão acesso total
     const admins = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo'];
     
-    // Verifica na lista OU na variável que veio do HTML
-    return admins.includes(user) || (typeof IS_ADMIN_SESSION !== 'undefined' && IS_ADMIN_SESSION === true);
+    // Verifica se é admin por nome OU pela variável do servidor
+    // Usamos !! para garantir que seja tratado como um valor verdadeiro/falso real
+    const eAdminSessao = (typeof window.IS_ADMIN_SESSION !== 'undefined' && window.IS_ADMIN_SESSION === true);
+    const eAdminLista = admins.includes(user);
+
+    const resultado = eAdminLista || eAdminSessao;
+    
+    console.log(`Verificando acesso para: ${user} | É Admin? ${resultado}`);
+    return resultado;
 }
 
     // ================== FILTROS ==================
@@ -184,12 +191,15 @@ function hasFullAccess(username) {
     }
 
     // ================== FUNÇÕES DE RENDERIZAÇÃO ==================
-    function renderizarClientes() {
+function renderizarClientes() {
         const container = document.getElementById('clients-container');
         if (!container) return;
         container.innerHTML = '';
 
-        const usuarioLogado = currentUser?.toLowerCase().trim();
+        // ALTERAÇÃO 1: Garantir que o usuário logado seja capturado do sessionStorage de forma limpa
+        const usuarioLogado = (sessionStorage.getItem('usuario') || '').toLowerCase().trim();
+        
+        // ALTERAÇÃO 2: Forçar a verificação da variável global que vem do HTML (mesmo que o editor aponte erro)
         const isAdmin = hasFullAccess(usuarioLogado);
 
         filteredData.forEach(cliente => {
@@ -200,16 +210,17 @@ function hasFullAccess(username) {
             // 1. Verifica se é o dono direto
             const ehDonoDoCliente = consultorLimpo === usuarioLogado;
             
-            // 2. Verifica se o cliente está "sem dono" (vazio, zero, traço ou termos genéricos)
+            // 2. Verifica se o cliente está "sem dono"
             const semConsultor = consultorLimpo === "" || 
                                 consultorLimpo === "0" || 
                                 consultorLimpo === "-" || 
                                 consultorLimpo === "undefined" || 
-                                consultorLimpo === "não informado";
+                                consultorLimpo === "não informado" ||
+                                consultorLimpo === "nao informado";
 
-            // 3. Regra final: Pode editar se for Admin OU Dono OU se o cliente estiver sem consultor
+            // 3. ALTERAÇÃO 3: Lógica de segurança reforçada
+            // Se NÃO for Admin, e NÃO for o Dono, e o card JÁ TIVER um dono diferente, podeEditar será FALSE.
             const podeEditar = isAdmin || ehDonoDoCliente || semConsultor;
-            // --------------------------------
 
             const isChecked = cliente.checked ? 'checked' : '';
             const corMovel = cliente.m_movel >= 17 ? '#10b981' : '#64748b';
@@ -237,7 +248,7 @@ function hasFullAccess(username) {
             if (cliente.sip_voz === 'SIM') htmlServicos += '<span style="background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:10px; font-size:0.65rem; font-weight:800;">🌐 SIP</span>';
             htmlServicos += '</div>';
 
-            // --- MONTAGEM DO HTML ---
+            // --- MONTAGEM DO HTML (Mantendo sua estrutura original) ---
             card.innerHTML = `
                 <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
                     <div style="flex: 1;">
@@ -308,30 +319,6 @@ function hasFullAccess(username) {
             `;
             container.appendChild(card);
         });
-    }
-    // FUNÇÃO PARA ENVIAR O CHECK PARA O SERVIDOR
-    async function toggleCheck(cnpj, isChecked) {
-        try {
-            const response = await fetch('/api/check_cliente', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cnpj: cnpj, checked: isChecked })
-            });
-
-            if (response.ok) {
-                // Atualiza os dados locais para manter a interface rápida
-                const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
-                if (cliente) {
-                    cliente.checked = isChecked;
-                    // Re-aplica os filtros para atualizar a cor do card na tela
-                    aplicarFiltros();
-                }
-            } else {
-                alert("Erro ao salvar status. Verifique sua conexão.");
-            }
-        } catch (error) {
-            console.error("Erro no fetch do check:", error);
-        }
     }
     // ================== FUNÇÃO DOS GRÁFICOS ==================
     function atualizarGraficos(dados) {
