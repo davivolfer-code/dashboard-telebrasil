@@ -11,7 +11,8 @@ let instanciaGraficos = { movel: null, fixa: null };
 const ADMIN_USERS = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo',];
 
 function hasFullAccess(username) {
-    return ADMIN_USERS.includes(username?.toLowerCase());
+    const manualAdmins = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo'];
+    return manualAdmins.includes(username?.toLowerCase()) || IS_ADMIN_SESSION;
 }
 
 // ================== FILTROS ==================
@@ -182,38 +183,45 @@ function renderizarClientes() {
     if (!container) return;
     container.innerHTML = '';
 
+    const usuarioLogado = currentUser?.toLowerCase().trim();
+    const isAdmin = hasFullAccess(usuarioLogado);
+
     filteredData.forEach(cliente => {
         const card = document.createElement('div');
-        // ALTERAÇÃO: Adiciona classe 'checked-card' se o cliente estiver marcado
         card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
+        const consultorLimpo = String(cliente.consultor || '').toLowerCase().trim();
+        
+        // 1. Verifica se é o dono direto
+        const ehDonoDoCliente = consultorLimpo === usuarioLogado;
+        
+        // 2. Verifica se o cliente está "sem dono" (vazio, zero, traço ou termos genéricos)
+        const semConsultor = consultorLimpo === "" || 
+                             consultorLimpo === "0" || 
+                             consultorLimpo === "-" || 
+                             consultorLimpo === "undefined" || 
+                             consultorLimpo === "não informado";
 
-        const temAcesso = hasFullAccess(currentUser) || cliente.consultor?.toLowerCase() === currentUser?.toLowerCase();
+        // 3. Regra final: Pode editar se for Admin OU Dono OU se o cliente estiver sem consultor
+        const podeEditar = isAdmin || ehDonoDoCliente || semConsultor;
+        // --------------------------------
+
         const isChecked = cliente.checked ? 'checked' : '';
-
         const corMovel = cliente.m_movel >= 17 ? '#10b981' : '#64748b';
         const corFixa = cliente.m_fixa >= 7 ? '#10b981' : '#64748b';
-        const statusFunil = cliente.status_funil || 'aberto'; // aberto, ganho, perdido
+        const statusFunil = cliente.status_funil || 'aberto';
 
-        // --- Bloco EXTRA (Mantido) ---
+        // --- Bloco EXTRA ---
         let htmlCodigoExtra = '';
-        const nomeUpper = cliente.nome.toUpperCase();
-        if (nomeUpper.includes('EXTRA')) {
-            const valorFinal = (cliente.cd_pessoa && cliente.cd_pessoa !== "0" && cliente.cd_pessoa !== "")
-                ? cliente.cd_pessoa
-                : "NÃO LOCALIZADO NO JSON";
-
+        if (cliente.nome.toUpperCase().includes('EXTRA')) {
+            const valorFinal = (cliente.cd_pessoa && cliente.cd_pessoa !== "0") ? cliente.cd_pessoa : "NÃO LOCALIZADO";
             htmlCodigoExtra = `
-                    <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 8px; padding: 10px; margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span style="font-size: 0.75rem; color: #9f1239; font-weight: 900;">⚠️ IDENTIFICADO COMO EXTRA</span>
-                        </div>
-                        <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; color: #be123c; font-weight: 800; text-align: center;">
-                            ID: ${valorFinal}
-                        </div>
-                    </div>`;
+                <div style="background: #fff1f2; border: 2px solid #e11d48; border-radius: 8px; padding: 10px; margin-bottom: 15px; text-align: center;">
+                    <span style="font-size: 0.7rem; color: #9f1239; font-weight: 900;">⚠️ IDENTIFICADO COMO EXTRA</span><br>
+                    <b style="font-family: monospace; font-size: 1.1rem; color: #be123c;">ID: ${valorFinal}</b>
+                </div>`;
         }
 
-        // --- Bloco Serviços (Mantido) ---
+        // --- Bloco Serviços ---
         let htmlServicos = '<div style="display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;">';
         if (cliente.ddr === 'SIM' || cliente.vox_digital === 'SIM') {
             const label = cliente.vox_digital === 'SIM' ? 'VOX DIGITAL' : 'DDR';
@@ -223,105 +231,78 @@ function renderizarClientes() {
         if (cliente.sip_voz === 'SIM') htmlServicos += '<span style="background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:10px; font-size:0.65rem; font-weight:800;">🌐 SIP</span>';
         htmlServicos += '</div>';
 
-        // --- HTML DO CARD ATUALIZADO ---
+        // --- MONTAGEM DO HTML ---
         card.innerHTML = `
-                <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                        <div style="font-weight: 800; color: #1e293b; font-size: 1rem;">${cliente.nome}</div>
-                        <div style="font-size: 0.8rem; color: #64748b;">📍 ${cliente.cidade} | CNPJ: ${formatarCNPJ(cliente.cnpj)}</div>
-                    </div>
-                    <div style="margin-left: 10px; text-align: center;">
-                        <input type="checkbox" ${isChecked} 
-                            style="width: 22px; height: 22px; cursor: pointer; accent-color: #660099;" 
-                            onclick="event.stopPropagation(); toggleCheck('${cliente.cnpj}', this.checked)">
-                        <div style="font-size: 0.5rem; font-weight: bold; color: #64748b; margin-top: 2px;">VISTO</div>
-                    </div>
+            <div class="client-header" style="border-bottom: 2px solid #660099; padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1;">
+                    <div style="font-weight: 800; color: #1e293b; font-size: 1rem;">${cliente.nome}</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">📍 ${cliente.cidade} | CNPJ: ${formatarCNPJ(cliente.cnpj)}</div>
                 </div>
-                <div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
-    <label style="font-size: 0.65rem; font-weight: bold; color: #64748b; display: block; margin-bottom: 4px;">NOTAS / OBSERVAÇÕES:</label>
-    <textarea 
-        class="obs-input" 
-        placeholder="Escreva uma observação..." 
-        onchange="salvarObservacao('${cliente.cnpj}', this.value)"
-        style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: #fff;"
-    >${cliente.observacao || ''}</textarea>
-</div>
-<div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-            <label style="font-size: 0.65rem; font-weight: bold; color: #64748b; display: block;">NOTAS E STATUS:</label>
-            <div style="display: flex; gap: 4px;">
-                <button onclick="atualizarFunil('${cliente.cnpj}', 'ganho')" 
-                    style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; font-weight: bold;">🏆 GANHO</button>
-                <button onclick="atualizarFunil('${cliente.cnpj}', 'perdido')" 
-                    style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; cursor: pointer; font-weight: bold;">❌ PERDIDO</button>
+                <div style="margin-left: 10px; text-align: center;">
+                    <input type="checkbox" ${isChecked} 
+                        ${!podeEditar ? 'disabled' : ''} 
+                        style="width: 22px; height: 22px; cursor: ${podeEditar ? 'pointer' : 'not-allowed'}; accent-color: #660099;" 
+                        onclick="event.stopPropagation(); toggleCheck('${cliente.cnpj}', this.checked)">
+                    <div style="font-size: 0.5rem; font-weight: bold; color: #64748b; margin-top: 2px;">VISTO</div>
+                </div>
             </div>
-        </div>
-        
-        <textarea 
-            class="obs-input" 
-            placeholder="Escreva uma observação..." 
-            onchange="salvarNotaCompleta('${cliente.cnpj}', this.value)"
-            style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: #fff;"
-        >${cliente.observacao || ''}</textarea>
-        
-        <div style="font-size: 0.6rem; color: #94a3b8; margin-top: 2px; text-align: right;">
-            📅 ${cliente.data_obs || 'Sem registro'}
-        </div>
-    </div>
 
-
-                ${htmlCodigoExtra} 
-                ${htmlServicos}
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                    <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
-                        <small style="color: #64748b; font-weight: bold;">MÓVEL</small><br><b style="color:${corMovel}">M ${cliente.m_movel}</b>
-                    </div>
-                    <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
-                        <small style="color: #64748b; font-weight: bold;">FIXA</small><br><b style="color:${corFixa}">M ${cliente.m_fixa}</b>
+            <div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <label style="font-size: 0.65rem; font-weight: bold; color: #64748b;">NOTAS E STATUS:</label>
+                    <div style="display: flex; gap: 4px;">
+                        <button onclick="atualizarFunil('${cliente.cnpj}', 'ganho')" 
+                            ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                            style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold;">🏆 GANHO</button>
+                        <button onclick="atualizarFunil('${cliente.cnpj}', 'perdido')" 
+                            ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                            style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold;">❌ PERDIDO</button>
                     </div>
                 </div>
+                
+                <textarea 
+                    class="obs-input" 
+                    placeholder="${podeEditar ? 'Escreva uma observação...' : 'Apenas visualização'}" 
+                    ${!podeEditar ? 'readonly' : ''}
+                    onchange="salvarNotaCompleta('${cliente.cnpj}', this.value)"
+                    style="width: 100%; font-size: 0.75rem; border: 1px solid #e2e8f0; border-radius: 4px; padding: 5px; resize: none; min-height: 40px; background: ${podeEditar ? '#fff' : '#f8fafc'};"
+                >${cliente.observacao || ''}</textarea>
+                
+                <div style="font-size: 0.6rem; color: #94a3b8; margin-top: 2px; text-align: right;">
+                    📅 ${cliente.data_obs || 'Sem registro'}
+                </div>
+            </div>
 
-                ${temAcesso ? `
-                    <div style="background:#fffbeb; padding:10px; border-radius:6px; font-size:0.8rem; margin-bottom:10px; border: 1px solid #fde68a; color: #92400e; font-weight: 500;">
-                        💡 ${cliente.recomendacao}
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <b style="color:#25d366; font-family: monospace; font-size: 1rem;">${cliente.telefone}</b>
-                        <a href="https://wa.me/55${cliente.telefone.replace(/\D/g, '')}" target="_blank" 
-                        style="background:#25d366; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.75rem; font-weight:bold; box-shadow: 0 2px 4px rgba(37,211,102,0.2);">
-                        WhatsApp
-                        </a>
-                    </div>
-                ` : `
-                    <div style="text-align:center; color:#94a3b8; font-size:0.8rem; padding:10px; background: #f1f5f9; border-radius: 6px;">
-                        🔒 Consultor: ${cliente.consultor}
-                    </div>
-                `}
-            `;
+            ${htmlCodigoExtra} 
+            ${htmlServicos}
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0;">
+                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; font-weight: bold;">MÓVEL</small><br><b style="color:${corMovel}">M ${cliente.m_movel}</b>
+                </div>
+                <div style="background:#f8fafc; padding:5px; border-radius:5px; text-align:center; border: 1px solid #e2e8f0;">
+                    <small style="color: #64748b; font-weight: bold;">FIXA</small><br><b style="color:${corFixa}">M ${cliente.m_fixa}</b>
+                </div>
+            </div>
+
+            <div style="background:#fffbeb; padding:10px; border-radius:6px; font-size:0.8rem; margin-bottom:10px; border: 1px solid #fde68a; color: #92400e; font-weight: 500;">
+                💡 ${cliente.recomendacao}
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display: flex; flex-direction: column;">
+                    <b style="color:#25d366; font-family: monospace; font-size: 1rem;">${cliente.telefone}</b>
+                    <span style="font-size: 0.65rem; color: #64748b;">👤 Consultor: ${cliente.consultor || 'SEM CONSULTOR'}</span>
+                </div>
+                <a href="https://wa.me/55${cliente.telefone.replace(/\D/g, '')}" target="_blank" 
+                   style="background:#25d366; color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.75rem; font-weight:bold;">
+                   WhatsApp
+                </a>
+            </div>
+        `;
         container.appendChild(card);
     });
 }
-
-async function salvarObservacao(cnpj, texto) {
-    try {
-        const response = await fetch('/api/salvar_obs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cnpj: cnpj, observacao: texto })
-        });
-
-        if (response.ok) {
-            // Atualiza localmente para não precisar recarregar
-            const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
-            if (cliente) cliente.observacao = texto;
-            console.log("Observação salva!");
-        }
-    } catch (error) {
-        console.error("Erro ao salvar nota:", error);
-    }
-}
-
 // FUNÇÃO PARA ENVIAR O CHECK PARA O SERVIDOR
 async function toggleCheck(cnpj, isChecked) {
     try {
@@ -482,7 +463,9 @@ const exportData = filteredData.map(c => ({
     // Gera o download do arquivo .xlsx real
     XLSX.writeFile(workbook, `Relatorio_Telebrasil_${currentFilter}.xlsx`);
 }
-// Função que salva o texto e gera a data automática
+
+// Salva a observação e gera a data automática
+// --- FUNÇÃO PARA SALVAR NOTAS E DATA ---
 async function salvarNotaCompleta(cnpj, texto) {
     const dataAtual = new Date().toLocaleString('pt-BR');
     try {
@@ -501,14 +484,16 @@ async function salvarNotaCompleta(cnpj, texto) {
             if (cliente) {
                 cliente.observacao = texto;
                 cliente.data_obs = dataAtual;
-                // Re-renderiza para mostrar a data nova sem dar refresh
+                // Atualiza apenas a lista filtrada e renderiza para mostrar a nova data na tela
                 renderizarClientes();
             }
         }
-    } catch (error) { console.error("Erro ao salvar nota:", error); }
+    } catch (error) { 
+        console.error("Erro ao salvar nota:", error); 
+    }
 }
 
-// Função que salva o status de Ganho ou Perdido
+// --- FUNÇÃO PARA SALVAR STATUS (GANHO/PERDIDO) ---
 async function atualizarFunil(cnpj, status) {
     try {
         const response = await fetch('/api/salvar_detalhes', {
@@ -521,8 +506,11 @@ async function atualizarFunil(cnpj, status) {
             const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
             if (cliente) {
                 cliente.status_funil = status;
-                aplicarFiltros(); // Atualiza a tela e as cores dos botões
+                // Re-aplica os filtros para atualizar as cores dos botões (verde/vermelho)
+                aplicarFiltros(); 
             }
         }
-    } catch (error) { console.error("Erro ao atualizar funil:", error); }
+    } catch (error) { 
+        console.error("Erro ao atualizar funil:", error); 
+    }
 }

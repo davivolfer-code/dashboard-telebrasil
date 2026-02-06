@@ -218,13 +218,10 @@ def salvar_detalhes():
 
         for c in clientes:
             if str(c.get('cnpj')) == cnpj_alvo:
-                # Salva observação e a data obrigatória
-                if 'observacao' in dados_req:
-                    c['observacao'] = dados_req['observacao']
-                    c['data_obs'] = dados_req['data_obs']
-                # Salva status do funil (ganho/perdido)
-                if 'status_funil' in dados_req:
-                    c['status_funil'] = dados_req['status_funil']
+                # Atualiza apenas o que foi enviado na requisição
+                if 'observacao' in dados_req: c['observacao'] = dados_req['observacao']
+                if 'data_obs' in dados_req: c['data_obs'] = dados_req['data_obs']
+                if 'status_funil' in dados_req: c['status_funil'] = dados_req['status_funil']
                 break
 
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
@@ -232,7 +229,7 @@ def salvar_detalhes():
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-
+    
 # --- INICIALIZAÇÃO ---
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
