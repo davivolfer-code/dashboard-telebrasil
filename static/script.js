@@ -8,24 +8,17 @@
     // --- CONTROLE DOS GRÁFICOS ---
     let instanciaGraficos = { movel: null, fixa: null };
 
-    const ADMIN_USERS = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo',];
+     const ADMIN_USERS = ['renata', 'franciele', 'davi', 'pedro', 'admin'];
 
 function hasFullAccess(username) {
     if (!username) return false;
     const user = username.toLowerCase().trim();
     
-    // Lista de Admins - APENAS estes nomes terão acesso total
-    const admins = ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo'];
-    
-    // Verifica se é admin por nome OU pela variável do servidor
-    // Usamos !! para garantir que seja tratado como um valor verdadeiro/falso real
+    // Usa a constante restrita que definimos no topo
+    const eAdminLista = ADMIN_USERS.includes(user);
     const eAdminSessao = (typeof window.IS_ADMIN_SESSION !== 'undefined' && window.IS_ADMIN_SESSION === true);
-    const eAdminLista = admins.includes(user);
 
-    const resultado = eAdminLista || eAdminSessao;
-    
-    console.log(`Verificando acesso para: ${user} | É Admin? ${resultado}`);
-    return resultado;
+    return eAdminLista || eAdminSessao;
 }
 
     // ================== FILTROS ==================
@@ -204,7 +197,7 @@ function renderizarClientes() {
 
         filteredData.forEach(cliente => {
             const card = document.createElement('div');
-            card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
+           card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
             const consultorLimpo = String(cliente.consultor || '').toLowerCase().trim();
             
             // 1. Verifica se é o dono direto
@@ -505,5 +498,31 @@ function renderizarClientes() {
             }
         } catch (error) { 
             console.error("Erro ao atualizar funil:", error); 
+        }
+    }
+
+    async function toggleCheck(cnpj, isChecked) {
+        try {
+            const response = await fetch('/api/check_cliente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cnpj: cnpj, checked: isChecked })
+            });
+
+            if (response.ok) {
+                // Atualiza o dado na lista local
+                const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
+                if (cliente) {
+                    cliente.checked = isChecked;
+                    
+                    // AQUI ESTÁ O SEGREDO DO VERDE: 
+                    // Em vez de recarregar tudo, apenas atualizamos a cor do card atual
+                    renderizarClientes(); 
+                }
+            } else {
+                alert("Erro ao salvar o visto. Tente novamente.");
+            }
+        } catch (error) {
+            console.error("Erro no fetch do check:", error);
         }
     }

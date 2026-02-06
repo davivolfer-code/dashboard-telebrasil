@@ -436,11 +436,9 @@ body {
     transform: scale(1.1);
 }
 /* Efeito de card */
-.client-card.checked-card {
-    background-color: #f0fdf4 !important; /* Verde Vivo suave */
+.checked-card {
     border: 2px solid #10b981 !important;
-    transform: scale(0.98);
-    opacity: 0.9;
+    background-color: #f0fdf4 !important; /* Um verde bem clarinho */
 }
 
 /* Hover suave nos cards */
@@ -450,4 +448,16 @@ body {
 .client-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Quando o card está marcado, ele ganha uma borda e fundo verdes */
+.client-card.checked-card {
+    border: 2px solid #10b981 !important;
+    background-color: #f0fdf4 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+/* Garante que o checkbox tenha a cor da marca */
+input[type="checkbox"]:checked {
+    accent-color: #10b981;
 }
