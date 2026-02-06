@@ -62,15 +62,18 @@ def login():
     if request.method == 'POST':
         user = request.form.get('username', '').lower().strip()
         senha = request.form.get('password', '')
+        
         if user in usuarios and usuarios[user] == senha:
             session.permanent = True
             session['usuario'] = user
-            # --- ADICIONE ESTA LINHA ABAIXO ---
-            session['is_admin'] = user in ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo']
+            admins_permitidos = ['renata', 'franciele', 'davi', 'pedro', 'admin']
+            
+            session['is_admin'] = user in admins_permitidos
+            
             return redirect(url_for('dashboard'))
         erro = 'Usuário ou senha incorretos'
     return render_template('login.html', erro=erro)
-    
+
 @app.route('/dashboard')
 def dashboard():
     if 'usuario' not in session: return redirect(url_for('login'))
