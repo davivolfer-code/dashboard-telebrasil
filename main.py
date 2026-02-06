@@ -65,6 +65,8 @@ def login():
         if user in usuarios and usuarios[user] == senha:
             session.permanent = True
             session['usuario'] = user
+            # --- ADICIONE ESTA LINHA ABAIXO ---
+            session['is_admin'] = user in ['renata', 'franciele', 'admin', 'davi', 'pedro', 'danila', 'alvaro', 'gabriela', 'ricardo']
             return redirect(url_for('dashboard'))
         erro = 'Usuário ou senha incorretos'
     return render_template('login.html', erro=erro)

@@ -169,6 +169,10 @@
     });
   </script>
 
+  <script>
+    const IS_ADMIN_SESSION = {{ 'true' if session.get('is_admin') else 'false' }};
+  </script>
+
   <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 
   <div id="vivonauta-icon"
