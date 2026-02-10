@@ -141,7 +141,7 @@ def upload():
         else:
             df = pd.read_csv(filepath, sep=None, engine='python', dtype=str, encoding='latin1')
         
-        df.columns = [str(c).strip().upper() for c in df.columns]
+        df.columns = [str(c).strip().upper() for c in df.columns] 
 
         mapeamento = {
             'NM_CLIENTE': 'nome', 
@@ -170,8 +170,8 @@ def upload():
         for col in colunas_final:
             if col not in df_json.columns: df_json[col] = ""
 
-        df_json['m_movel'] = pd.to_numeric(df_json['m_movel'], errors='coerce').fillna(0).astype(int)
-        df_json['m_fixa'] = pd.to_numeric(df_json['m_fixa'], errors='coerce').fillna(0).astype(int)
+        df_json['M_MOVEL'] = pd.to_numeric(df_json['M_MOVEL'], errors='coerce').fillna(0).astype(int)
+        df_json['M_FIXA'] = pd.to_numeric(df_json['M_FIXA'], errors='coerce').fillna(0).astype(int)
         df_json['cnpj'] = df_json['cnpj'].apply(limpa_id)
         df_json['cd_pessoa'] = df_json['cd_pessoa'].apply(limpa_id)
         df_json['consultor'] = df_json['consultor'].str.strip()
