@@ -144,18 +144,29 @@ def upload():
         df.columns = [str(c).strip().upper() for c in df.columns]
 
         mapeamento = {
-            'NM_CLIENTE': 'nome', 'NR_CNPJ': 'cnpj', 'DS_ID_CIDADE': 'cidade', 'DS_CIDADE': 'cidade', 
-            'SITUACAO_RECEITA': 'situacao', 'RECOMENDACAO': 'recomendacao', 
-            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone', 'CONSULTOR': 'consultor', 'CONSULTORES': 'consultor',
-            'VENCIMENTO': 'vencimento', 'DATA_FIM_VTECH': 'data_fim_vtech', 'VIVO_TECH': 'vivo_tech',
-            'QT_MOVEL_TERM': 'm_movel', 'QT_BASICA_TERM_FIBRA': 'm_fixa', 'TP_PRODUTO': 'tp_produto',
-            'QT_BASICA_TERM_METALICO': 'term_metalico', 'DS_DISPONIBILIDADE': 'disponibilidade',
-            'DDR': 'ddr', '0800': 'zero800', 'SIP_VOZ': 'sip_voz', 'VOX_DIGITAL': 'vox_digital', 'CD_PESSOA': 'cd_pessoa'
-        }
+            'NM_CLIENTE': 'nome', 
+            'NR_CNPJ': 'cnpj', 
+            'DS_ID_CIDADE': 'cidade', 
+            'DS_CIDADE': 'cidade', 
+            'SITUACAO_RECEITA': 'situacao', 
+            'RECOMENDACAO': 'recomendacao', 
+            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone', 
+            'CONSULTOR': 'consultor', 
+            'CONSULTORES': 'consultor',
+            'VENCIMENTO': 'vencimento', 
+            'DATA_FIM_VTECH': 'data_fim_vtech', 
+            'VIVO_TECH': 'vivo_tech',
+            'M_MOVEL': 'M_MOVEL',
+            'M_FIXA': 'M_FIXA',
+            'TP_PRODUTO': 'tp_produto',
+            'QT_BASICA_TERM_METALICO': 'term_metalico', 
+            'DS_DISPONIBILIDADE': 'disponibilidade',
+            'DDR': 'ddr', '0800': 'zero800', 'SIP_VOZ': 'sip_voz', 
+            'VOX_DIGITAL': 'vox_digital', 'CD_PESSOA': 'cd_pessoa'
+        }   
         
         df_json = df.rename(columns=mapeamento)
-        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 'telefone', 'm_movel', 'm_fixa', 'tp_produto', 'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
-
+        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 'telefone', 'M_MOVEL', 'M_FIXA', 'tp_produto', 'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
         for col in colunas_final:
             if col not in df_json.columns: df_json[col] = ""
 
