@@ -112,8 +112,8 @@ function hasFullAccess(username) {
                     cnpj: String(c.cnpj || c.NR_CNPJ || '').trim(),
                     cidade: String(c.cidade || c.DS_CIDADE || '').trim(),
                     situacao: String(c.situacao || c.SITUACAO_RECEITA || '').toUpperCase(),
-                    m_movel: parseInt(c.m_movel || c.QT_MOVEL_TERM) || 0,
-                    m_fixa: parseInt(c.m_fixa || c.QT_BASICA_TERM_FIBRA) || 0,
+                    m_movel: parseInt(c.m_movel || c.M_MOVEL) || 0,
+                    m_fixa: parseInt(c.m_fixa || c.M_FIXA) || 0,
                     checked: c.checked || false,
                     // Mantendo os outros campos
                     data_fim_vtech: String(c.data_fim_vtech || '').trim(),
