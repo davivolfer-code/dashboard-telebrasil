@@ -3,7 +3,6 @@ import re
 import json
 import pandas as pd
 import numpy as np
-import google.generativeai as genai 
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
@@ -48,40 +47,6 @@ def carregar_contexto_arquivos():
     return conteudo
 
 # --- ROTAS DE NAVEGAÇÃO ---
-@app.route('/')
-def index():
-    return redirect(url_for('login'))
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if 'usuario' in session: return redirect(url_for('dashboard'))
-    erro = None
-    if request.method == 'POST':
-        user = request.form.get('username', '').lower().strip()
-        senha = request.form.get('password', '')
-        
-        if user in usuarios and usuarios[user] == senha:
-            session.permanent = True
-            session['usuario'] = user
-            admins_permitidos = ['renata', 'franciele', 'davi', 'pedro', 'admin']
-            
-            session['is_admin'] = user in admins_permitidos
-            
-            return redirect(url_for('dashboard'))
-        erro = 'Usuário ou senha incorretos'
-    return render_template('login.html', erro=erro)
-
-@app.route('/dashboard')
-def dashboard():
-    if 'usuario' not in session: return redirect(url_for('login'))
-    return render_template('dashboard.html', usuario=session['usuario'])
-
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-# --- ROTA DE UPLOAD ---
 @app.route('/upload', methods=['POST'])
 def upload():
     if 'usuario' not in session: return jsonify({"erro": "Não autorizado"}), 401
@@ -101,52 +66,69 @@ def upload():
         df.columns = [str(c).strip().upper() for c in df.columns] 
 
         mapeamento = {
-            'NM_CLIENTE': 'nome', 
-            'NR_CNPJ': 'cnpj', 
-            'DS_ID_CIDADE': 'cidade', 
-            'DS_CIDADE': 'cidade', 
-            'SITUACAO_RECEITA': 'situacao', 
-            'RECOMENDACAO': 'recomendacao', 
-            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone', 
-            'CONSULTOR': 'consultor', 
-            'CONSULTORES': 'consultor',
-            'VENCIMENTO': 'vencimento', 
-            'DATA_FIM_VTECH': 'data_fim_vtech', 
-            'VIVO_TECH': 'vivo_tech',
-            'M_MOVEL': 'M_MOVEL',
-            'M_FIXA': 'M_FIXA',
-            'TP_PRODUTO': 'tp_produto',
-            'QT_BASICA_TERM_METALICO': 'term_metalico', 
-            'DS_DISPONIBILIDADE': 'disponibilidade',
+            'NM_CLIENTE': 'nome', 'NR_CNPJ': 'cnpj', 'DS_ID_CIDADE': 'cidade', 
+            'DS_CIDADE': 'cidade', 'SITUACAO_RECEITA': 'situacao', 'RECOMENDACAO': 'recomendacao', 
+            'CELULAR_CONTATO_PRINCIPAL_SFA': 'telefone', 'CONSULTOR': 'consultor', 
+            'CONSULTORES': 'consultor', 'VENCIMENTO': 'vencimento', 
+            'DATA_FIM_VTECH': 'data_fim_vtech', 'VIVO_TECH': 'vivo_tech',
+            'M_MOVEL': 'M_MOVEL', 'M_FIXA': 'M_FIXA', 'TP_PRODUTO': 'tp_produto',
+            'QT_BASICA_TERM_METALICO': 'term_metalico', 'DS_DISPONIBILIDADE': 'disponibilidade',
             'DDR': 'ddr', '0800': 'zero800', 'SIP_VOZ': 'sip_voz', 
             'VOX_DIGITAL': 'vox_digital', 'CD_PESSOA': 'cd_pessoa'
         }   
         
         df_json = df.rename(columns=mapeamento)
-        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 
-                         'situacao', 'recomendacao', 'telefone', 
-                         'M_MOVEL', 'M_FIXA', 'tp_produto', 'data_fim_vtech', 
+        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 
+                         'telefone', 'M_MOVEL', 'M_FIXA', 'tp_produto', 'data_fim_vtech', 
                          'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 
-                         'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa'
-                         ]
+                         'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
         
         for col in colunas_final:
             if col not in df_json.columns: df_json[col] = ""
 
-        df_json['M_MOVEL'] = pd.to_numeric(df_json['M_MOVEL'], errors='coerce').fillna(0).astype(int)
-        df_json['M_FIXA'] = pd.to_numeric(df_json['M_FIXA'], errors='coerce').fillna(0).astype(int)
+        # Conversão numérica segura
+        for col_num in ['M_MOVEL', 'M_FIXA']:
+            df_json[col_num] = pd.to_numeric(df_json[col_num], errors='coerce').fillna(0).astype(int)
+        
+        # Limpa IDs para o novo DataFrame
         df_json['cnpj'] = df_json['cnpj'].apply(limpa_id)
         df_json['cd_pessoa'] = df_json['cd_pessoa'].apply(limpa_id)
         df_json['consultor'] = df_json['consultor'].str.strip()
 
-        dados = df_json[colunas_final].fillna("").to_dict(orient='records')
+        dados_novos = df_json[colunas_final].fillna("").to_dict(orient='records')
+        
+        # --- LÓGICA DE MESCLAGEM REFORÇADA ---
+        if os.path.exists(JSON_PATH):
+            try:
+                with open(JSON_PATH, 'r', encoding='utf-8') as f:
+                    dados_existentes = json.load(f)
+                
+                # Criamos o cache usando o CNPJ limpo como chave para garantir o match
+                cache_existente = {}
+                for c in dados_existentes:
+                    id_limpo = limpa_id(c.get('cnpj', ''))
+                    if id_limpo:
+                        cache_existente[id_limpo] = c
+                
+                for novo in dados_novos:
+                    id_novo = limpa_id(novo.get('cnpj', ''))
+                    if id_novo in cache_existente:
+                        ex = cache_existente[id_novo]
+                        # Preserva campos que não existem na planilha
+                        novo['checked'] = ex.get('checked', False)
+                        novo['observacao'] = ex.get('observacao', '')
+                        novo['data_obs'] = ex.get('data_obs', '')
+                        novo['status_funil'] = ex.get('status_funil', 'aberto')
+            except Exception as e:
+                print(f"Erro ao ler arquivo para mesclagem: {e}")
+
         with open(JSON_PATH, 'w', encoding='utf-8') as f:
-            json.dump(dados, f, ensure_ascii=False, indent=4)
+            json.dump(dados_novos, f, ensure_ascii=False, indent=4)
             
-        return jsonify({"mensagem": "Upload concluído!", "status": "ok"})
+        return jsonify({"mensagem": "Upload concluído! Dados preservados.", "status": "ok"})
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
-
+    
 # --- ROTAS DE DADOS E FILTROS ---
 @app.route('/api/filtros')
 def get_filtros():

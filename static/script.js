@@ -8,7 +8,7 @@ let currentUser = sessionStorage.getItem('usuario');
 // --- CONTROLE DOS GRÁFICOS ---
 let instanciaGraficos = { movel: null, fixa: null };
 
-const ADMIN_USERS = ['renata', 'franciele', 'davi', 'pedro', 'admin'];
+const ADMIN_USERS = ['renata', 'franciele', 'davi', 'pedro',]; // Lista de usuários que têm acesso total
 
 function hasFullAccess(username) {
     if (!username) return false;
@@ -320,7 +320,7 @@ function atualizarGraficos(dados) {
 
     if (!ctxSituacao || !ctxCidades) return;
 
-    // --- GRÁFICO 1: SITUAÇÃO DA BASE (Pizza/Doughnut) ---
+    // --- GRÁFICO 1: SITUAÇÃO DA BASE ---
     const contagemSituacao = dados.reduce((acc, c) => {
         const sit = c.situacao || 'NÃO INFORMADO';
         acc[sit] = (acc[sit] || 0) + 1;
