@@ -1,4 +1,4 @@
-# 📊 Dashboard Vivo - Fran Melo
+# 📊 Dashboard Vivo - Davi Fernandes Geraldo
 
 Sistema de dashboard inteligente com visual moderno e funcionalidade de **upload de planilhas mensais**, filtros dinâmicos e visualização de clientes por status, cluster, recomendação e produto.
 
@@ -32,7 +32,7 @@ Sistema de dashboard inteligente com visual moderno e funcionalidade de **upload
 ## 🙋Desenvolvido por
 
 **Davi Fernandes**  
-🌐 Vendedora Vivo Empresas, apaixonada por tecnologia, IA e organização.  
+🌐 Estudante de Análise e Desenvolvimento de Sistemas, estagiário na Vivo Telebrasil.  
 📧 davivolfer@gmail.com  
 🔗 [https://www.linkedin.com/in/davi-fernandes-geraldo-28897b2ab/]
 

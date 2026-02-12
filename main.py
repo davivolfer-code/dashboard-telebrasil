@@ -14,9 +14,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'telebrasil_secret_key_2025')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024 
 
-# --- CONFIGURAÇÃO GEMINI ---
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DADOS_FOLDER = os.path.join(BASE_DIR, 'dados')
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
@@ -84,46 +81,6 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# --- ROTA DE CHAT ---
-@app.route('/chat', methods=['POST'])
-def chat():
-    if 'usuario' not in session: 
-        return jsonify({"erro": "Não autorizado"}), 401
-    
-    try:
-        dados_requisicao = request.json
-        pergunta_usuario = dados_requisicao.get('message', '')
-        contexto_estrategico = carregar_contexto_arquivos()
-        
-        if os.path.exists(JSON_PATH):
-            with open(JSON_PATH, 'r', encoding='utf-8') as f:
-                dados_clientes = f.read()[:7000]
-        else:
-            dados_clientes = "Sem dados."
-
-        modelos_para_testar = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro']
-        response = None
-        erro_final = ""
-
-        for nome_modelo in modelos_para_testar:
-            try:
-                model = genai.GenerativeModel(nome_modelo)
-                response = model.generate_content(
-                    f"Atue como Vivonauta Pulse. Contexto: {contexto_estrategico}\nDados: {dados_clientes}\nPergunta: {pergunta_usuario}"
-                )
-                if response: break 
-            except Exception as e:
-                erro_final = str(e)
-                continue 
-
-        if response and response.text:
-            return jsonify({"response": response.text})
-        else:
-            return jsonify({"response": f"Erro na conexão Gemini: {erro_final}"})
-
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
 # --- ROTA DE UPLOAD ---
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -166,7 +123,13 @@ def upload():
         }   
         
         df_json = df.rename(columns=mapeamento)
-        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 'situacao', 'recomendacao', 'telefone', 'M_MOVEL', 'M_FIXA', 'tp_produto', 'data_fim_vtech', 'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa']
+        colunas_final = ['nome', 'cnpj', 'cidade', 'consultor', 
+                         'situacao', 'recomendacao', 'telefone', 
+                         'M_MOVEL', 'M_FIXA', 'tp_produto', 'data_fim_vtech', 
+                         'vivo_tech', 'vencimento', 'term_metalico', 'disponibilidade', 
+                         'ddr', 'zero800', 'sip_voz', 'vox_digital', 'cd_pessoa'
+                         ]
+        
         for col in colunas_final:
             if col not in df_json.columns: df_json[col] = ""
 
