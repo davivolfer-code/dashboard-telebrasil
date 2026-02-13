@@ -257,19 +257,18 @@ function renderizarClientes() {
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 4px;">
-                  <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'ganho' ? 'aberto' : 'ganho'}')" 
-                  ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
-        style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
-        🏆 ${statusFunil === 'ganho' ? 'GANHO (DESMARCAR)' : 'GANHO'}
-    </button>
-    
-    <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'perdido' ? 'aberto' : 'perdido'}')" 
-        ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
-        style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
-        ❌ ${statusFunil === 'perdido' ? 'PERDIDO (DESMARCAR)' : 'PERDIDO'}
-    </button>
-</div>
+                <div style="margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label style="font-size: 0.65rem; font-weight: bold; color: #64748b;">NOTAS E STATUS:</label>
+                        <div style="display: flex; gap: 4px;">
+                            <button onclick="atualizarFunil('${cliente.cnpj}', 'ganho')" 
+                                ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                                style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold;">🏆 GANHO</button>
+                            <button onclick="atualizarFunil('${cliente.cnpj}', 'perdido')" 
+                                ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                                style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold;">❌ PERDIDO</button>
+                        </div>
+                    </div>
                     
                     <textarea 
                         class="obs-input" 
