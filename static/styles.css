@@ -462,20 +462,26 @@ input[type="checkbox"]:checked {
     accent-color: #10b981;
 }
 
-/* Card quando for GANHO */
-.client-card.status-ganho {
-    border: 2px solid #10b981 !important;
-    background-color: #f0fdf4 !important;
+#filters-container {
+    display: flex;
+    flex-wrap: wrap; /* Permite que os botões novos ocupem a linha de baixo se faltar espaço */
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
-/* Card quando for PERDIDO */
-.client-card.status-perdido {
-    border: 2px solid #ef4444 !important;
-    background-color: #fef2f2 !important;
-}
-
-/* Card quando for ABERTO (Resetado) */
-.client-card.status-aberto {
+.filter-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.2s;
     border: 1px solid #e2e8f0;
-    background-color: #ffffff;
+    background: white;
+}
+
+.filter-btn.active {
+    background: #660099;
+    color: white;
+    border-color: #660099;
 }

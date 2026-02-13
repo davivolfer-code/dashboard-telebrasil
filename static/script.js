@@ -75,6 +75,22 @@ const filtros = [
         nome: 'SIP VOZ',
         filtro: (c) => String(c.sip_voz || '').toUpperCase().trim() === 'SIM'
     },
+
+    {
+        id: 'clientes_vistos',
+        nome: '✅ Apenas Vistos',
+        filtro: (c) => c.checked === true
+    },
+    {
+        id: 'clientes_ganhos',
+        nome: '🏆 Ganhos',
+        filtro: (c) => c.status_funil === 'ganho'
+    },
+    {
+        id: 'clientes_perdidos',
+        nome: '❌ Perdidos',
+        filtro: (c) => c.status_funil === 'perdido'
+    }
 ];
 
 // ================== INICIALIZAÇÃO ==================
