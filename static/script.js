@@ -269,7 +269,7 @@ function renderizarClientes() {
                  style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
                  ❌ ${statusFunil === 'perdido' ? 'PERDIDO (DESMARCAR)' : 'PERDIDO'}
                 </button>
-            </div>
+               </div>
                     
                     <textarea 
                         class="obs-input" 
@@ -493,8 +493,8 @@ async function atualizarFunil(cnpj, status) {
             const cliente = clientesData.find(c => String(c.cnpj) === String(cnpj));
             if (cliente) {
                 cliente.status_funil = status;
-                // Renderiza novamente para aplicar as novas classes CSS e textos dos botões
-                renderizarClientes(); 
+                // Re-aplica os filtros para atualizar as cores dos botões (verde/vermelho)
+                aplicarFiltros();
             }
         }
     } catch (error) {
