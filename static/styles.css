@@ -461,3 +461,21 @@ body {
 input[type="checkbox"]:checked {
     accent-color: #10b981;
 }
+
+/* Card quando for GANHO */
+.client-card.status-ganho {
+    border: 2px solid #10b981 !important;
+    background-color: #f0fdf4 !important;
+}
+
+/* Card quando for PERDIDO */
+.client-card.status-perdido {
+    border: 2px solid #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+/* Card quando for ABERTO (Resetado) */
+.client-card.status-aberto {
+    border: 1px solid #e2e8f0;
+    background-color: #ffffff;
+}
