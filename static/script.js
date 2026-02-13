@@ -197,7 +197,7 @@ function renderizarClientes() {
 
     filteredData.forEach(cliente => {
         const card = document.createElement('div');
-        card.className = `client-card ${cliente.checked ? 'checked-card' : ''} status-${statusFunil}`;
+        card.className = `client-card ${cliente.checked ? 'checked-card' : ''}`;
         const consultorLimpo = String(cliente.consultor || '').toLowerCase().trim();
 
         // 1. Verifica se é o dono direto
@@ -257,19 +257,19 @@ function renderizarClientes() {
                     </div>
                 </div>
 
-            <div style="display: flex; gap: 4px;">
-                <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'ganho' ? 'aberto' : 'ganho'}')" 
+                <div style="display: flex; gap: 4px;">
+                  <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'ganho' ? 'aberto' : 'ganho'}')" 
                   ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
-                  style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
-                  🏆 ${statusFunil === 'ganho' ? 'GANHO (DESMARCAR)' : 'GANHO'}
-                </button>
+        style="background: ${statusFunil === 'ganho' ? '#10b981' : '#f1f5f9'}; color: ${statusFunil === 'ganho' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
+        🏆 ${statusFunil === 'ganho' ? 'GANHO (DESMARCAR)' : 'GANHO'}
+    </button>
     
-                <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'perdido' ? 'aberto' : 'perdido'}')" 
-                 ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
-                 style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
-                 ❌ ${statusFunil === 'perdido' ? 'PERDIDO (DESMARCAR)' : 'PERDIDO'}
-                </button>
-               </div>
+    <button onclick="atualizarFunil('${cliente.cnpj}', '${statusFunil === 'perdido' ? 'aberto' : 'perdido'}')" 
+        ${!podeEditar ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+        style="background: ${statusFunil === 'perdido' ? '#ef4444' : '#f1f5f9'}; color: ${statusFunil === 'perdido' ? 'white' : '#64748b'}; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; cursor: pointer;">
+        ❌ ${statusFunil === 'perdido' ? 'PERDIDO (DESMARCAR)' : 'PERDIDO'}
+    </button>
+</div>
                     
                     <textarea 
                         class="obs-input" 
